@@ -7,10 +7,10 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>com.frazao</groupId>
-  <artifactId>laco-amor</artifactId>
+  <artifactId>laco-de-amor</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>Projeto Laço Amor</name>
+  <name>Projeto Laço de Amor</name>
 
   <modules>
     <module>./dao</module>
@@ -23,7 +23,7 @@
     <module>./util</module>
   </modules>
 
-  <description>Projeto Laço e Amor</description>
+  <description>Projeto Laço de Amor</description>
 
 	<properties>
 		<java.version>1.8</java.version>
