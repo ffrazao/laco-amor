@@ -1,0 +1,23 @@
+<mat-menu #rootMenu="matMenu">
+  <button mat-menu-item [matMenuTriggerFor]="subMenuCadastro">Cadastros</button>
+  <button mat-menu-item [matMenuTriggerFor]="subMenuAcao">Ações</button>
+  <button mat-menu-item>Configurações</button>
+</mat-menu>
+
+<mat-menu #subMenuCadastro="matMenu">
+  <button mat-menu-item>Fornecedor</button>
+  <button mat-menu-item>Parceiro</button>
+  <button mat-menu-item>Comprador</button>
+  <button mat-menu-item>Modelo de Produtos</button>
+</mat-menu>
+
+<mat-menu #subMenuAcao="matMenu">
+  <button mat-menu-item>Cotar</button>
+  <button mat-menu-item>Comprar Matéria Prima</button>
+  <button mat-menu-item>Produzir</button>
+  <button mat-menu-item>Vender</button>
+</mat-menu>
+
+<button mat-icon-button [matMenuTriggerFor]="rootMenu">
+  <mat-icon>more_vert</mat-icon>
+</button>
