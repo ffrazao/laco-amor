@@ -1,0 +1,34 @@
+<!-- Default form contact -->
+<form [formGroup]="form">
+
+    <p class="h5 mb-4">Formulário</p>
+
+    <label>Tipo</label>
+    <div>
+        <div class="custom-control custom-radio">
+            <input type="radio" class="custom-control-input" id="tipoPF" name="tipo" mdbInput>
+            <label class="custom-control-label" for="defaultUnchecked">Pessoa Física</label>
+        </div>
+        <div class="custom-control custom-radio">
+            <input type="radio" class="custom-control-input" id="tipoPJ" name="tipo" mdbInput>
+            <label class="custom-control-label" for="defaultChecked">Pessoa Jurídica</label>
+        </div>
+    </div>
+
+    <input id="cpf" formControlName="cpf" type="text" class="form-control mb-4" placeholder="CPF">
+    <input id="cnpj" formControlName="cnpj" type="text" class="form-control mb-4" placeholder="CNPJ">
+
+    <input id="nome" formControlName="nome" type="text" class="form-control mb-4" placeholder="Nome">
+    <input id="email" formControlName="email" type="text" class="form-control mb-4" placeholder="E-mail">
+    <input id="contato1" formControlName="contato1" type="text" class="form-control mb-4" placeholder="Contato 1">
+    <input id="contato2" formControlName="contato2" type="text" class="form-control mb-4" placeholder="Contato 2">
+    <input id="contato3" formControlName="contato3" type="text" class="form-control mb-4" placeholder="Contato 3">
+
+    <input type="email" id="email" class="form-control mb-4" placeholder="E-mail">
+
+
+    <!-- Send button -->
+    <button class="btn btn-info btn-block" type="submit">Enviar</button>
+
+</form>
+<!-- Default form contact -->

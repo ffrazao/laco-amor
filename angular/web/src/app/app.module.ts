@@ -7,7 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
 
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { MenuModule } from './comum/menu/menu.module';
 import { RodapeModule } from './comum/rodape/rodape.module';
@@ -23,12 +23,14 @@ import { RodapeModule } from './comum/rodape/rodape.module';
     AppRoutingModule,
     BrowserAnimationsModule,
     FormsModule,
+    ReactiveFormsModule,
 
     MenuModule,
     RodapeModule,
   ],
   exports: [
     MDBBootstrapModule,
+    ReactiveFormsModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

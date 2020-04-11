@@ -2,7 +2,8 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 const routes: Routes = [
-  {path: '', loadChildren: () => import('./comum/casa/casa.module').then(m => m.CasaModule) }
+  {path: 'cadastro', loadChildren: () => import('./cadastro/cadastro.module').then(m => m.CadastroModule) },
+  {path: '', loadChildren: () => import('./comum/casa/casa.module').then(m => m.CasaModule) },
 ];
 
 @NgModule({
