@@ -1,4 +1,4 @@
-.bak
+*.bak
 
 # System Files
 .DS_Store
