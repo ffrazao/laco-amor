@@ -1,13 +1,9 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { findIndexById } from '../comum/ferramenta/ferramenta';
+import { findIndexById } from '../ferramenta/ferramenta';
 
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
 export abstract class ServicoCrudService<E, F> {
 
   private _http: HttpClient;
@@ -33,10 +29,6 @@ export abstract class ServicoCrudService<E, F> {
     return this._filtro;
   }
 
-  public set lista(valor) {
-    this._lista = valor;
-  }
-
   public set form(valor) {
     this._form = valor;
   }
@@ -47,32 +39,37 @@ export abstract class ServicoCrudService<E, F> {
 
   public create(entidade: E) {
     // environment.API_URL;
-    this.lista.push(entidade);
+    if (entidade != null) {
+      entidade['id'] = this.lista.length + 1;
+      this.lista.push(entidade);
+    }
   }
 
-  public restore(id): E {
+  public restore(id: number): E {
     let result: E = null;
 
-    let idx = findIndexById(this.lista, id);
-    if (idx) {
+    let idx = findIndexById(this.lista, id as number);
+    if (idx >= 0) {
       result = this.lista[idx];
+    } else {
+      throw new Error('Registro não encontrado ' + id);
     }
 
     return result;
   }
 
-  public update(id, entidade: E): void {
+  public update(id: number, entidade: E): void {
     let result: E = null;
 
     let idx = findIndexById(this.lista, id);
-    if (idx) {
+    if (idx >= 0) {
       this.lista[idx] = entidade;
     } else {
       throw new Error('Registro não encontrado ' + id);
     }
   }
 
-  public delete(id) {
+  public delete(id: number) {
     let result: E = null;
     let idx = findIndexById(this.lista, id);
     if (idx) {
@@ -82,27 +79,34 @@ export abstract class ServicoCrudService<E, F> {
     }
   }
 
+  public novo() {
+    return {} as E;
+  }
+
   public fitrar() {
     if (!this.filtro || !this.lista || !this.lista.length) {
-      return [];
+      return this.lista;
     }
     let camposFiltro = Object.getOwnPropertyNames(this.filtro);
     let camposRegistro = Object.getOwnPropertyNames(this.lista[0]);
 
     return this.lista.filter(reg => {
-
-      let encontrado = false;
+      let encontrado = true;
       for (let j = 0; j < camposRegistro.length; j++) {
         for (let i = 0; i < camposFiltro.length; i++) {
-          if (this.filtro[camposFiltro[j]]
+          if (encontrado
+            && this.filtro[camposFiltro[j]]
             && reg[camposRegistro[i]]
             && camposFiltro[j] === camposRegistro[i]) {
-              encontrado = this.filtro[camposFiltro[j]] === reg[camposRegistro[i]];
-              break;
+            encontrado = this.filtro[camposFiltro[j]] === reg[camposRegistro[i]];
+            break;
           }
         }
-        return encontrado;
+        if (!encontrado) {
+          break;
+        }
       }
+      return encontrado;
     });
   }
 

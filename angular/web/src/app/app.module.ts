@@ -10,8 +10,8 @@ import { AppComponent } from './app.component';
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { MenuModule } from './comum/menu/menu.module';
-import { RodapeModule } from './comum/rodape/rodape.module';
+import { MenuModule } from './comum/componente/menu/menu.module';
+import { RodapeModule } from './comum/componente/rodape/rodape.module';
 
 
 @NgModule({

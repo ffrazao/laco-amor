@@ -3,7 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 const routes: Routes = [
   {path: 'cadastro', loadChildren: () => import('./cadastro/cadastro.module').then(m => m.CadastroModule) },
-  {path: '', loadChildren: () => import('./comum/casa/casa.module').then(m => m.CasaModule) },
+  {path: '', loadChildren: () => import('./comum/componente/casa/casa.module').then(m => m.CasaModule) },
 ];
 
 @NgModule({

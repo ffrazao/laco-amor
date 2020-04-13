@@ -17,7 +17,7 @@ export function findIndexById(lista: any[], id: number): number {
         return result;
     }
     for (let i = 0; i < lista.length; i++) {
-        if (lista[i]['id'] && lista[i]['id'] === id) {
+        if (lista[i]['id'] && lista[i]['id'] == id) {
             result = i;
             break
         }

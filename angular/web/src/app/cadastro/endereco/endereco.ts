@@ -6,5 +6,5 @@ export interface Endereco {
     bairro: string,
     cidade: string,
     uf: string,
-    cep: string,
+    cep: string,    
 }
