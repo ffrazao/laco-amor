@@ -6,3 +6,6 @@ https://mdbootstrap.com/
 
 Este projeto junta os componentes do Angular Material Design com o Bootstrap. Fazer o download da versão free e iniciar a construção do projeto. Versão baixada em 11/04/2020.
 
+
+Dica importante para criação de subrepositorios e vinculação com o repositório principal
+https://showmethecode.com.br/git-subtree/
