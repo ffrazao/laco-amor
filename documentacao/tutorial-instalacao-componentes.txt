@@ -9,3 +9,10 @@ Este projeto junta os componentes do Angular Material Design com o Bootstrap. Fa
 
 Dica importante para criação de subrepositorios e vinculação com o repositório principal
 https://showmethecode.com.br/git-subtree/
+
+Dica importante para fazer deploy de aplicação angular no Heroku
+https://www.devmedia.com.br/subindo-uma-aplicacao-angular-para-o-heroku/40260
+https://backefront.com.br/configurando-projeto-angular-heroku/
+
+Dica importante para fazer deploy de aplicação java no Heroku
+https://devcenter.heroku.com/articles/getting-started-with-java?singlepage=true
