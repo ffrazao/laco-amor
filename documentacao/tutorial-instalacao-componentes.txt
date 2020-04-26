@@ -16,3 +16,6 @@ https://backefront.com.br/configurando-projeto-angular-heroku/
 
 Dica importante para fazer deploy de aplicação java no Heroku
 https://devcenter.heroku.com/articles/getting-started-with-java?singlepage=true
+
+No Angular 9 é possível instalar o bootstrap de forma direta com o comando 
+ng add @ng-bootstrap/schematics
