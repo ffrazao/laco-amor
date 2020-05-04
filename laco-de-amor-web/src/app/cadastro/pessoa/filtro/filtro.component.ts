@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
-import { gerarFormulario } from '../../../comum/ferramenta/ferramenta';
+import { gerarFormulario } from '../../../comum/ferramenta/ferramenta-comum';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PessoaService } from '../pessoa.service';
-import { PessoaFiltro } from '../pessoa-filtro';
+import { PessoaFiltro } from '../../../comum/entidade/filtro/pessoa-filtro';
 
 @Component({
   selector: 'app-filtro',
@@ -13,8 +13,8 @@ import { PessoaFiltro } from '../pessoa-filtro';
 })
 export class FiltroComponent implements OnInit {
 
-  public form: FormGroup;
-  isEnviado = false;
+  public frm: FormGroup;
+  public isEnviado = false;
   public entidade: PessoaFiltro;
 
   constructor(
@@ -25,7 +25,7 @@ export class FiltroComponent implements OnInit {
 
   ngOnInit(): void {
       this.entidade = this.servico.filtro;
-      this.form = this.criarFormulario(this.entidade);
+      this.frm = this.criarFormulario(this.entidade);
   }
 
   criarFormulario(entidade) {
@@ -41,7 +41,7 @@ export class FiltroComponent implements OnInit {
 
   public enviar() {
     this.isEnviado = true;
-    this.entidade = this.form.value;
+    this.entidade = this.frm.value;
     this.servico.filtro = this.entidade;
     
     this.router.navigate(['cadastro', 'pessoa']);

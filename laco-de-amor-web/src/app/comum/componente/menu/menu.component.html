@@ -1,53 +1,95 @@
-<!--Navbar-->
-<mdb-navbar SideClass="navbar navbar-expand-lg navbar-dark indigo">
+<mat-toolbar color="primary">
+    <mat-toolbar-row>
+        <button mat-button [matMenuTriggerFor]="cadastroMenu">Cadastro</button>
+        <mat-menu #cadastroMenu="matMenu">
+            <button mat-menu-item>
+                <a [routerLink]="['/', 'cadastro', 'pessoa']">Pessoas</a>
+            </button>
+            <!-- <button mat-menu-item>
+                <a [routerLink]="['/', 'cadastro', 'usuario']">Usuário</a>
+            </button> -->
+            <button mat-menu-item>
+                <a [routerLink]="['/', 'cadastro', 'produto-modelo']">Modelo de Produtos</a>
+            </button>
+        </mat-menu>
 
-    <!-- Navbar brand -->
-    <mdb-navbar-brand><a class="navbar-brand" href="/">Laço de Amor</a></mdb-navbar-brand>
+        <button mat-button [matMenuTriggerFor]="acoesMenu">Ações</button>
+        <mat-menu #acoesMenu="matMenu">
+            <button mat-menu-item>
+                <a [routerLink]="['/', 'acao', 'cotar']">Cotar</a>
+            </button>
+            <button mat-menu-item>
+                <a [routerLink]="['/', 'acao', 'comprar']">Comprar</a>
+            </button>
+            <button mat-menu-item>
+                <a [routerLink]="['/', 'acao', 'produzir']">Produzir</a>
+            </button>
+            <button mat-menu-item>
+                <a [routerLink]="['/', 'acao', 'vender']">Vender</a>
+            </button>
+        </mat-menu>
 
-    <!-- Collapsible content -->
+        <button mat-button [matMenuTriggerFor]="sistemaMenu"><i class="fas fa-user"></i><span
+                class="caret"></span>Sistema</button>
+        <mat-menu #sistemaMenu="matMenu">
+            <button mat-menu-item>
+                <a [routerLink]="['/', 'login']">Efetuar login (Entrar)</a>
+            </button>
+            <button mat-menu-item>
+                <a [routerLink]="['/', 'logout']">Efetuar logout (Sair)</a>
+            </button>
+        </mat-menu>
+    </mat-toolbar-row>
+</mat-toolbar>
+
+
+<!-- 
+            <mdb-navbar SideClass="navbar navbar-expand-lg navbar-dark indigo">
+    <mdb-navbar-brand><a class="navbar-brand" [routerLink]="['/']">Laço de Amor</a></mdb-navbar-brand>
     <links>
-
-        <!-- Links -->
         <ul class="navbar-nav mr-auto">
-            <li class="nav-item active dropdown" dropdown>
-                <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
-                Cadastro<span class="caret"></span></a>
+            <li class="nav-item dropdown" dropdown>
+                <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light"
+                    mdbWavesEffect>
+                    Cadastro<span class="caret"></span></a>
                 <div *dropdownMenu class="dropdown-menu dropdown dropdown-primary" role="menu">
-                    <a class="dropdown-item waves-light" mdbWavesEffect href="/cadastro/pessoa">Pessoas</a>
-                    <a class="dropdown-item waves-light" mdbWavesEffect href="#">Fornecedor</a>
-                    <a class="dropdown-item waves-light" mdbWavesEffect href="#">Parceiro</a>
-                    <a class="dropdown-item waves-light" mdbWavesEffect href="#">Cliente</a>
+                    <a class="dropdown-item waves-light" mdbWavesEffect
+                        [routerLink]="['/', 'cadastro', 'pessoa']">Pessoas</a>
                     <div class="divider dropdown-divider"></div>
-                    <a class="dropdown-item waves-light" mdbWavesEffect href="#">Usuário</a>
+                    <a class="dropdown-item waves-light" mdbWavesEffect
+                        [routerLink]="['/', 'cadastro', 'usuario']">Usuário</a>
+                    <a class="dropdown-item waves-light" mdbWavesEffect
+                        [routerLink]="['/', 'cadastro', 'produto-modelo']">Modelo de Produtos</a>
                 </div>
             </li>
-
-            <li class="nav-item active dropdown" dropdown>
-                <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light" mdbWavesEffect>
-                Ações<span class="caret"></span></a>
+            <li class="nav-item dropdown" dropdown>
+                <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light"
+                    mdbWavesEffect>
+                    Ações<span class="caret"></span></a>
                 <div *dropdownMenu class="dropdown-menu dropdown dropdown-primary" role="menu">
-                    <a class="dropdown-item waves-light" mdbWavesEffect href="#">Cotar</a>
-                    <a class="dropdown-item waves-light" mdbWavesEffect href="#">Comprar Matéria Prima</a>
-                    <a class="dropdown-item waves-light" mdbWavesEffect href="#">Produzir</a>
-                    <a class="dropdown-item waves-light" mdbWavesEffect href="#">Vender</a>
+                    <a class="dropdown-item waves-light" mdbWavesEffect [routerLink]="['/', 'acao', 'cotar']">Cotar</a>
+                    <a class="dropdown-item waves-light" mdbWavesEffect [routerLink]="['/', 'acao', 'comprar']">Comprar
+                        Matéria Prima</a>
+                    <a class="dropdown-item waves-light" mdbWavesEffect
+                        [routerLink]="['/', 'acao', 'produzir']">Produzir</a>
+                    <a class="dropdown-item waves-light" mdbWavesEffect
+                        [routerLink]="['/', 'acao', 'vender']">Vender</a>
                 </div>
             </li>
-
-            <li class="nav-item">
-                <a class="nav-link waves-light" mdbWavesEffect>Configuração</a>
-            </li>
-
         </ul>
-        <!-- Links -->
-
-<!-- Search form -->
-        <!-- <form class="form-inline waves-light" mdbWavesEffect>
-            <div class="md-form my-0">
-                <input class="form-control mr-sm-2" type="text" placeholder="Search">
-            </div>
-        </form> -->
+        <ul class="navbar-nav mr-auto navbar-right">
+            <li class="nav-item dropdown" dropdown>
+                <a dropdownToggle mdbWavesEffect type="button" class="nav-link dropdown-toggle waves-light"
+                    mdbWavesEffect>
+                    <i class="fas fa-user"></i><span class="caret"></span></a>
+                <div *dropdownMenu class="dropdown-menu dropdown dropdown-primary" role="menu">
+                    <a class="dropdown-item waves-light" mdbWavesEffect [routerLink]="['/login']">Efetuar login
+                        (Entrar)</a>
+                    <a class="dropdown-item waves-light" mdbWavesEffect [routerLink]="['/logout']">Efetuar logout
+                        (Sair)</a>
+                </div>
+            </li>
+        </ul>
     </links>
-    <!-- Collapsible content -->
-
 </mdb-navbar>
-<!--/.Navbar-->
+-->

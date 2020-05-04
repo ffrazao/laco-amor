@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormArray } from '@angular/forms';
-
-import { gerarFormulario } from '../../../comum/ferramenta/ferramenta';
-import { Pessoa } from '../pessoa';
+import { FormGroup, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+
 import { PessoaService } from '../pessoa.service';
-import { PessoaEndereco } from '../pessoa-endereco';
-import { Endereco } from '../../endereco/endereco';
+import { PessoaFormService } from '../pessoa-form.service';
+import { MensagemService } from '../../../comum/servico/mensagem/mensagem.service';
+import { Pessoa } from '../../../comum/entidade/modelo/pessoa';
+import { Parceiro } from '../../../comum/entidade/modelo/parceiro';
+import { Fornecedor } from '../../../comum/entidade/modelo/fornecedor';
+import { Cliente } from '../../../comum/entidade/modelo/cliente';
+import { PessoaEndereco } from '../../../comum/entidade/modelo/pessoa-endereco';
 
 @Component({
   selector: 'app-form',
@@ -14,170 +17,158 @@ import { Endereco } from '../../endereco/endereco';
   styleUrls: ['./form.component.scss']
 })
 export class FormComponent implements OnInit {
-  
-  public frm = this.criarFormulario(new Pessoa());
-  
-  isEnviado = false;
+
+  public frm = this._formService.criarFormulario(new Pessoa());
+
+  public isEnviado = false;
   public entidade: Pessoa;
-  id: number;
+  public id: number;
   public acao: string;
-  editar: boolean[];
-  
+  public isParceiro: boolean = false;
+  public isFornecedor: boolean = false;
+  public isCliente: boolean = false;
+
+  public enderecoEditando = false;
+
   constructor(
-    private formBuilder: FormBuilder,
-    private route: ActivatedRoute,
-    private servico: PessoaService,
-    private router: Router) { }
-    
+    private _service: PessoaService,
+    private _formService: PessoaFormService,
+    private _route: ActivatedRoute,
+    private _router: Router,
+    private _mensagem: MensagemService,
+  ) {
+  }
+
   ngOnInit() {
-    this.route.params.subscribe(p => {
+    this._route.params.subscribe(p => {
       this.id = p.id;
-      console.log('id', p, this.id);
     });
 
-    this.route.data.subscribe((info) => {
+    this._route.data.subscribe((info) => {
       this.entidade = info['resolve']['principal'];
+      this.isParceiro = !!this.entidade.parceiro && !!this.entidade.parceiro.id;
+      this.isFornecedor = !!this.entidade.fornecedor && !!this.entidade.fornecedor.id;
+      this.isCliente = !!this.entidade.cliente && !!this.entidade.cliente.id;
       this.acao = !info['resolve']['acao'] ? 'Novo' : info['resolve']['acao'];
-      this.frm = this.criarFormulario(this.entidade);
-      console.log(this.frm);
+      this.frm = this._formService.criarFormulario(this.entidade);
     });
+  }
+
+  get parceiro(): FormGroup {
+    return this.frm.get('parceiro') as FormGroup;
+  }
+
+  get fornecedor(): FormGroup {
+    return this.frm.get('fornecedor') as FormGroup;
+  }
+
+  get cliente(): FormGroup {
+    return this.frm.get('cliente') as FormGroup;
   }
 
   get enderecoList(): FormArray {
-     return this.frm.get('enderecoList') as FormArray;
+    return this.frm.get('enderecoList') as FormArray;
   }
 
-  criarFormulario(entidade: Pessoa) {
-    if (!entidade) {
-      entidade = new Pessoa();
-    }
-
-    let result = this.formBuilder.group(
-      {
-        id: [entidade.id, []],
-        tipo: [entidade.tipo, []],
-        cpfCnpj: [entidade.cpfCnpj, []],
-        nome: [entidade.nome, []],
-        email: [entidade.email, []],
-        contato1: [entidade.contato1, []],
-        contato2: [entidade.contato2, []],
-        contato3: [entidade.contato3, []],
-        enderecoList: this.criarFormularioEnderecoList(entidade.enderecoList)
-      }
-    );
-
-    return result;
-  }
-
-
-  criarFormularioEnderecoList(lista: PessoaEndereco[]) {
-    let result = [];
-
-    if (lista && lista.length) {
-      for (let i = 0; i < lista.length; i++) {
-        result.push(this.criarFormularioPessoaEndereco(lista[i]));
-      }
-    }
-    return this.formBuilder.array(result);
-  }
-
-  criarFormularioPessoaEndereco(entidade: PessoaEndereco) {
-    if (!entidade) {
-      entidade = new PessoaEndereco();
-    }
-    let result = this.formBuilder.group(
-      {
-        id: [entidade.id, []],
-        endereco: this.criarFormularioEndereco(entidade.endereco),
-      }
-    );
-    return result;
-  }
-
-  criarFormularioEndereco(entidade: Endereco) {
-    if (!entidade) {
-      entidade = new Endereco();
-    }
-    let result = this.formBuilder.group(
-      {
-        id: [entidade.id, []],
-        logradouro: [entidade.logradouro, []],
-        complemento: [entidade.complemento, []],
-        numero: [entidade.numero, []],
-        bairro: [entidade.bairro, []],
-        cidade: [entidade.cidade, []],
-        uf: [entidade.uf, []],
-        cep: [entidade.cep, []],
-      }
-    );
-    return result;
-  }
-
-  public enviar() {
+  public enviar(event) {
+    event.preventDefault();
     this.isEnviado = true;
+
+    if (this.frm.invalid) {
+      let msg = 'Dados inválidos!';
+      this._mensagem.erro(msg);
+      throw new Error(msg);
+    }
+
     this.entidade = this.frm.value;
     if ('Novo' === this.acao) {
-      this.servico.create(this.entidade);
+      this._service.create(this.entidade);
+
+      if (this.entidade.parceiro.id === -1) {
+        this.entidade.parceiro.id = this.entidade.id;
+      }
+      if (this.entidade.fornecedor.id === -1) {
+        this.entidade.fornecedor.id = this.entidade.id;
+      }
+      if (this.entidade.cliente.id === -1) {
+        this.entidade.cliente.id = this.entidade.id;
+      }
+      this._service.lista.push(this.entidade);
+      this._router.navigate(['cadastro', 'pessoa', this.entidade.id]);
     } else {
-      this.servico.update(this.id, this.entidade);
+      this._service.update(this.id, this.entidade);
+      this._router.navigate(['cadastro', 'pessoa']);
     }
-    this.router.navigate(['cadastro', 'pessoa']);
   }
 
-  public novoEndereco() {
-    let reg = this.criarFormularioPessoaEndereco(new PessoaEndereco());
+  public novoEndereco(event) {
+    event.preventDefault();
+    let e = new PessoaEndereco();
+    let reg = this._formService.criarFormularioPessoaEndereco(e);
+    this.enderecoEditando = true;
     reg['editar'] = true;
     this.enderecoList.push(reg);
   }
 
-  public excluirEndereco(reg) {
-    console.log(reg);
-    this.enderecoList.removeAt(reg);
+  public salvarEndereco(reg) {
+    delete reg['anterior'];
+    reg['editar'] = false;
+    this.enderecoEditando = false;
+  }
+
+  public editarEndereco(reg) {
+    reg['anterior'] = reg.value;
+    reg['editar'] = true;
+    this.enderecoEditando = true;
+  }
+
+  public excluirEndereco(idx) {
+    this.enderecoList.removeAt(idx);
+    this.enderecoEditando = false;
+  }
+
+  public cancelarEndereco(reg) {
+    if (this.enderecoList.at(reg)['anterior']) {
+      let vlr = this.enderecoList.at(reg)['anterior'];
+      this.enderecoList.at(reg).setValue(vlr);
+      this.enderecoList.at(reg)['editar']=false;
+      delete this.enderecoList.at(reg)['anterior'];
+    } else {
+      this.enderecoList.removeAt(reg);
+    }
+    this.enderecoEditando = false;
+  }
+
+  public setParceiro() {
+    if (!this.isParceiro) {
+      let v = new Parceiro();
+      v.id = this.frm.value.id ? this.frm.value.id : -1;
+      v.funcao = null;
+      this.parceiro.setValue(v);
+    } else {
+      this.parceiro.setValue({ id: null, funcao: null });
+    }
+  }
+
+  public setCliente() {
+    if (!this.isCliente) {
+      let v = new Cliente();
+      v.id = this.frm.value.id ? this.frm.value.id : -1;
+      this.cliente.setValue(v);
+    } else {
+      this.cliente.setValue({ id: null });
+    }
+  }
+
+  public setFornecedor() {
+    if (!this.isFornecedor) {
+      let v = new Fornecedor();
+      v.id = this.frm.value.id ? this.frm.value.id : -1;
+      this.fornecedor.setValue(v);
+    } else {
+      this.fornecedor.setValue({ id: null });
+    }
   }
 
 }
-/*
-
-import { Component } from '@angular/core';
-import { FormControl, FormGroup, FormArray, FormBuilder } from '@angular/forms';
-
-@Component({
-  selector: 'my-app',
-  template: `
-    <form [formGroup]="form">
-      <input type="checkbox" formControlName="published"> Published
-      <div *ngIf="form.controls.published.value">
-
-        <h2>Credentials</h2>
-        <button (click)="addCreds()">Add</button>
-
-        <div formArrayName="credentials" *ngFor="let creds of form.controls.credentials?.value; let i = index">
-          <ng-container [formGroupName]="i">
-            <input placeholder="Username" formControlName="username">
-            <input placeholder="Password" formControlName="password">
-          </ng-container>
-        </div>
-
-      </div>
-    </form>
-  `,
-})
-export class FormComponent  {
-  form: FormGroup;
-
-  constructor(private fb: FormBuilder) {
-    this.form = this.fb.group({
-      published: true,
-      credentials: this.fb.array([]),
-    });
-  }
-
-  addCreds() {
-    const creds = this.form.controls.credentials as FormArray;
-    creds.push(this.fb.group({
-      username: '',
-      password: '',
-    }));
-  }
-}
-*/
+FormGroup
