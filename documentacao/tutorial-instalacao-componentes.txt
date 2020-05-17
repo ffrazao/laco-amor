@@ -7,8 +7,21 @@ https://mdbootstrap.com/
 Este projeto junta os componentes do Angular Material Design com o Bootstrap. Fazer o download da versão free e iniciar a construção do projeto. Versão baixada em 11/04/2020.
 
 
+
+
 Dica importante para criação de subrepositorios e vinculação com o repositório principal
 https://showmethecode.com.br/git-subtree/
+Basicamente:
+=> rodar uma vez no diretorio principal do projeto
+git remote add laco-de-amor-web https://github.com/ffrazao/laco-de-amor-web.git
+git remote add laco-de-amor-rest https://github.com/ffrazao/laco-de-amor-rest.git
+
+=> rodar para mesclar os subprojetos
+git subtree pull --prefix=laco-de-amor-web laco-de-amor-web master
+git subtree pull --prefix=laco-de-amor-rest laco-de-amor-rest master
+
+
+
 
 Dica importante para fazer deploy de aplicação angular no Heroku
 https://www.devmedia.com.br/subindo-uma-aplicacao-angular-para-o-heroku/40260
@@ -19,6 +32,8 @@ https://devcenter.heroku.com/articles/getting-started-with-java?singlepage=true
 
 No Angular 9 é possível instalar o bootstrap de forma direta com o comando 
 ng add @ng-bootstrap/schematics
+
+
 
 
 HEROKU
