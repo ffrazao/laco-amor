@@ -1,6 +1,6 @@
 import { Evento } from './evento';
 
-export class Vender extends Evento {
+export class Utilizar extends Evento {
 
     public id: number;
 
