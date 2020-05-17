@@ -19,3 +19,9 @@ https://devcenter.heroku.com/articles/getting-started-with-java?singlepage=true
 
 No Angular 9 é possível instalar o bootstrap de forma direta com o comando 
 ng add @ng-bootstrap/schematics
+
+
+HEROKU
+Definir variáveis de ambiente para definir o profile do spring
+Veja em: https://stackoverflow.com/questions/55984799/deploy-spring-boot-app-to-heroku-with-a-particular-application-properties-file
+Basicamente: Navegue até a guia settings, defina a chave como SPRING_PROFILES_ACTIVE e valor como prod, clique em save.
