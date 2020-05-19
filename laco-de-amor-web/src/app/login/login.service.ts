@@ -3,62 +3,52 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 
-import { TokenService } from '../comum/servico/token.service';
+import { LocalStorageService } from '../comum/servico/local-storage.service';
+import { Login } from '../comum/modelo/login';
 
 @Injectable()
 export class LoginService {
 
-  constructor(private _http: HttpClient, private _tokenService: TokenService) { }
+  constructor(private _http: HttpClient, private _localStorageService: LocalStorageService) { }
 
-  public login(login: string, senha: string) {
+  public login(valor: Login) {
     const credentials = `Basic ${this.getClientCredentials()}`;
 
     return this._http.post(
-      environment.AUTHORIZATION_SERVER + '/oauth/token', {},
+      environment.AUTHORIZATION_SERVER +
+      `/oauth/token?grant_type=password&username=${valor.login}&password=${valor.senha}&scope=read write`,
+      null,
       {
         observe: 'response',
         headers: new HttpHeaders({
-          'Content-Type': 'application/json; charset=utf-8',
-          'Authorization': credentials
+          'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+          Authorization: credentials,
         }),
-        params: {
-          'grant_type': 'password',
-          'username': login,
-          'password': senha
-        }
       }
     ).pipe(tap(resposta => {
-      let resp = resposta.body;
-      let token = resp['access_token'];
-      if (!token) {
-        let msg = 'Problemas ao autenticar o usuário!';
+      const resp = resposta.body;
+
+      if (!resp || !resp['access_token']) {
+        const msg = 'Problemas ao autenticar o usuário!';
+        this._localStorageService.removeDadosLogin();
         throw new Error(msg);
       }
-      this._tokenService.setToken(token);
-      /*
-      this._http.get(environment.REST_API_URL + '/usuario', {
-        observe: 'response',
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json; charset=utf-8',
-          'Authorization': `Bearer ${token}`
-        })
-      })
-        .subscribe((resposta) => {
-          //this._usuarioService.login((resposta.body as Usuario));
-        }, err => alert('Erro get usuario ' + JSON.stringify(err)));*/
-    }))
+
+      this._localStorageService.dadosLogin = resp;
+    }));
+
   }
 
   public logout() {
-    this._tokenService.removeToken();
+    this._localStorageService.removeDadosLogin();
   }
 
-  public usuario() {
-
+  public dadosLogin() {
+    return this._localStorageService.dadosLogin;
   }
 
   public estaLogado() {
-    return this._tokenService.hasToken();
+    return this._localStorageService.estaLogado;
   }
 
   private getClientCredentials() {
