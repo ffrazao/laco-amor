@@ -1,57 +1,64 @@
 package com.frazao.lacodeamorrest.rest;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.frazao.lacodeamorrest.bo.CRUDBO;
 import com.frazao.lacodeamorrest.modelo.dto.FiltroDTO;
 
 @RestController
-public abstract class CRUDREST<T, Id, F extends FiltroDTO, BO extends CRUDBO<T, Id, F>> {
+public abstract class CRUDREST<E, Id, F extends FiltroDTO, BO extends CRUDBO<E, Id, F>> {
 
-	private BO bo;
+	private final BO bo;
 
-	CRUDREST(BO bo) {
+	public CRUDREST(final BO bo) {
 		this.bo = bo;
 	}
 
 	@PostMapping
-	public Id create(T t) {
-		Id result = this.getBO().create(t);
+	public Id create(@RequestBody final E t) throws Exception {
+		final Id result = this.getBO().create(t);
 		return result;
 	}
 
-	@DeleteMapping
-	public void delete(Id id) {
+	@DeleteMapping("{id}")
+	public void delete(@PathVariable("id") final Id id) throws Exception {
 		this.getBO().delete(id);
 	}
 
 	@GetMapping
-	public List<T> filter(F filtro) {
-		List<T> result = this.getBO().filter(filtro);
+	public Collection<E> filter(final F filtro) throws Exception {
+		final Collection<E> result = this.getBO().filter(filtro);
 		return result;
 	}
 
 	public BO getBO() {
-		return this.bo;
-	}
-
-	@GetMapping("/{id}")
-	public T restore(@PathVariable("id") Id id) {
-		T result = (T) this.getBO().restore(id);
+		BO result = this.bo;
 		return result;
 	}
 
-	@PutMapping
-	public T update(Id id, T t) {
-		T result = (T) this.getBO().update(id, t);
+	@PostMapping("novo")
+	public E novo(@RequestBody(required = false) final E modelo) {
+		final E result = this.getBO().novo(modelo);
 		return result;
+	}
+
+	@GetMapping("{id}")
+	public E restore(@PathVariable("id") final Id id) throws Exception {
+		final E result = this.getBO().restore(id);
+		return result;
+	}
+
+	@PutMapping("{id}")
+	public void update(@PathVariable("id") final Id id, @RequestBody final E t) throws Exception {
+		this.getBO().update(id, t);
 	}
 
 }

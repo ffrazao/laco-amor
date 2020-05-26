@@ -7,22 +7,48 @@ spring:
 # PERFIL ATIVO
   profiles:
     active: 
+# LOCALIZACAO
+  mvc:
+    locale: pt_BR
+    locale-resolver: fixed
 
 # BANCO DE DADOS
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        show_sql: true
+        use_sql_comments: true
+        format_sql: true
   datasource:
     url: jdbc:mysql://localhost:3306/laco_de_amor
     username: root
     password: root
+    
+# JSON Serializador
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
 
 # LOG
 logging:
   level:
-    org.springframework.web: TRACE
-    org.springframework.security: TRACE
+    # root: debug
+    com.frazao.lacodeamorrest: trace
+    org.hibernate.SQL: debug
+    org.springframework.web: trace
+    org.springframework.security: trace
+    org.springframework.orm: debug
+    org.springframework.orm.jpa: debug
+    org.springframework.transaction: debug
+    org.springframework.transaction.interceptor: trace
+    org.springframework.jdbc: debug
     
-# E-MAIL
+# VALORES PADRAO
 default:
+# BANCO DE DADOS
+  database_schema: laco_de_amor
+# E-MAIL
   sender: lacodeamordf@gmail.com
   recipient: lacodeamordf@gmail.com
