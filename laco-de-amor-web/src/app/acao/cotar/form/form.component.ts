@@ -2,23 +2,24 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { constante } from '../../../comum/constante';
-import { CotarService } from '../cotar.service';
+import { CotarCrudService } from '../cotar.service';
 import { CotarFormService } from '../cotar-form.service';
 import { MensagemService } from '../../../comum/servico/mensagem/mensagem.service';
-import { ProdutoModeloService } from '../../../cadastro/produto-modelo/produto-modelo.service';
-import { PessoaService } from '../../../cadastro/pessoa/pessoa.service';
+import { ProdutoModeloCrudService } from '../../../cadastro/produto-modelo/produto-modelo.service';
+import { PessoaCrudService } from '../../../cadastro/pessoa/pessoa.service';
 import { Cotar } from '../../../comum/modelo/entidade/cotar';
 import { EventoProduto } from '../../../comum/modelo/entidade/evento-produto';
 import { EventoPessoa } from '../../../comum/modelo/entidade/evento-pessoa';
-import { EventoPessoaFuncao } from '../../../comum/modelo/entidade/evento-pessoa-funcao';
 import { ProdutoModelo } from '../../../comum/modelo/entidade/produto-modelo';
 import { Produto } from '../../../comum/modelo/entidade/produto';
 import { Pessoa } from '../../../comum/modelo/entidade/pessoa';
 import { UnidadeMedida } from '../../../comum/modelo/entidade/unidade-medida';
-import { isNumber } from '../../../comum/ferramenta/ferramenta-comum';
-import { EventoPessoaFuncaoService } from '../../evento-pessoa-funcao/evento-pessoa-funcao.service';
+import { constante } from '../../../comum/constante';
+import { isNumber, adMime, removeMime } from '../../../comum/ferramenta/ferramenta-comum';
+import { EventoPessoaFuncaoCrudService } from '../../evento-pessoa-funcao/evento-pessoa-funcao.service';
 import { unidadeMedidaListComparar } from '../../../comum/ferramenta/ferramenta-sistema';
+import { Confirmacao } from 'src/app/comum/modelo/dominio/confirmacao';
+import { EventoPessoaFuncao } from 'src/app/comum/modelo/entidade/evento-pessoa-funcao';
 
 @Component({
   selector: 'app-form',
@@ -27,28 +28,26 @@ import { unidadeMedidaListComparar } from '../../../comum/ferramenta/ferramenta-
 })
 export class FormComponent implements OnInit {
 
-  public frm = this._serviceFormService.criarFormulario(new Cotar());
+  public frm = this._formService.criarFormulario(new Cotar());
 
   public isEnviado = false;
-  public entidade: Cotar;
   public id: number;
-  public acao: string;
 
   public SEM_IMAGEM = constante.SEM_IMAGEM;
 
-  public unidadeMedidaList: UnidadeMedida[];
+  public unidadeMedidaList: UnidadeMedida[] = [];
+  private eventoPessoaFuncao;
 
   public selecionaTab = 0;
 
   constructor(
-    private _service: CotarService,
-    private _serviceFormService: CotarFormService,
+    private _service: CotarCrudService,
+    private _formService: CotarFormService,
     private _route: ActivatedRoute,
     private _router: Router,
     private _mensagem: MensagemService,
-    private _produtoModeloService: ProdutoModeloService,
-    private _pessoaService: PessoaService,
-    private _eventoPessoaFuncaoService: EventoPessoaFuncaoService,
+    private _produtoModeloService: ProdutoModeloCrudService,
+    private _pessoaService: PessoaCrudService,
   ) {
   }
 
@@ -58,12 +57,31 @@ export class FormComponent implements OnInit {
     });
 
     this._route.data.subscribe((info) => {
-      this.entidade = info['resolve']['principal'];
-      this.acao = !info['resolve']['acao'] ? 'Novo' : info['resolve']['acao'];
-      this.frm = this._serviceFormService.criarFormulario(this.entidade);
+      this._service.acao = !info.resolve.acao ? 'Novo' : info.resolve.acao;
 
-      this.unidadeMedidaList = info['resolve']['apoio'][0];
+      info.resolve.principal.subscribe((p: Cotar) => {
+        if (p.eventoProdutoList) {
+          p.eventoProdutoList.forEach((ep: EventoProduto) =>
+            ep.produto.produtoModelo.foto = adMime(ep.produto.produtoModelo.foto)
+          );
+        }
+        this._service.entidade = p;
+        this.carregar(this._service.entidade);
+      });
+
+      info.resolve.apoio[0].unidadeMedidaList.subscribe((a: UnidadeMedida[]) => {
+        this.unidadeMedidaList.length = 0;
+        a.forEach(aa => this.unidadeMedidaList.push(aa));
+      });
+
+      info.resolve.apoio[1].eventoPessoaFuncao.subscribe((a: EventoPessoaFuncao[]) => {
+        this.eventoPessoaFuncao = a[0];
+      });
     });
+  }
+
+  public get acao() {
+    return this._service.acao;
   }
 
   get eventoProdutoList() {
@@ -79,18 +97,50 @@ export class FormComponent implements OnInit {
     this.isEnviado = true;
 
     if (this.frm.invalid) {
-      let msg = 'Dados inválidos!';
+      const msg = 'Dados inválidos!';
       this._mensagem.erro(msg);
       throw new Error(msg);
     }
 
-    this.entidade = this.frm.value;
-    if ('Novo' === this.acao) {
-      this._service.create(this.entidade);
-      this._router.navigate(['acao', 'cotar', this.entidade.id]);
+    const entidade = this.frm.value;
+    if (entidade.eventoProdutoList) {
+      entidade.eventoProdutoList.forEach((ep: EventoProduto) =>
+        ep.produto.produtoModelo.foto = removeMime(ep.produto.produtoModelo.foto)
+      );
+    }
+
+    if ('Novo' === this._service.acao) {
+      this._service.create(entidade).subscribe((id: number) => {
+        this._mensagem.sucesso('Novo registro efetuado!\n\nVisualizando...');
+        this._router.navigate(['acao', this._service.funcionalidade, id]);
+      });
     } else {
-      this._service.update(this.id, this.entidade);
-      this._router.navigate(['acao', 'cotar']);
+      this._service.update(this.id, entidade).subscribe(() => {
+        this._mensagem.sucesso('Registro atualizado!');
+        this._router.navigate(['acao', this._service.funcionalidade]);
+      });
+    }
+  }
+
+  public carregar(f: Cotar) {
+    if (!f) {
+      f = new Cotar();
+    }
+    this.frm = this._formService.criarFormulario(f);
+  }
+
+  public async restaurar() {
+    if (await
+      this._mensagem.confirme(
+        `
+        <p>
+           Confirma a restauração dos dados do formulário?
+        </p>
+        <div class="alert alert-danger" role="alert">
+           Todas as modificações serão perdidas!
+        </div>
+         `)) {
+      this.carregar(this._service.entidade);
     }
   }
 
@@ -99,9 +149,9 @@ export class FormComponent implements OnInit {
     return produtoModelo ? `${produtoModelo.nome} (${produtoModelo.codigo})` : '';
   }
 
-  pesquisarEventoProduto = '';
+  public pesquisarEventoProduto = '';
 
-  $filteredOptionsEventoProduto = new Promise((resolve, reject) => {
+  public $filteredOptionsEventoProduto = new Promise((resolve, reject) => {
     let result = [];
     resolve(result);
     return result;
@@ -110,25 +160,26 @@ export class FormComponent implements OnInit {
   public completarEventoProduto(event: KeyboardEvent) {
     if (
       !(
-        (event.key === "ArrowUp") ||
-        (event.key === "ArrowDown") ||
-        (event.key === "ArrowRight") ||
-        (event.key === "ArrowLeft"))
+        (event.key === 'ArrowUp') ||
+        (event.key === 'ArrowDown') ||
+        (event.key === 'ArrowRight') ||
+        (event.key === 'ArrowLeft'))
     ) {
       this.$filteredOptionsEventoProduto = new Promise((resolve, reject) => {
-        let result = [];
+        const result = [];
         if (typeof this.pesquisarEventoProduto === 'string' && this.pesquisarEventoProduto.length) {
-          this._produtoModeloService.lista.forEach(val => {
-            let p = this.pesquisarEventoProduto.toLowerCase();
-            if (val.materiaPrima === 'S' &&
-              (val.nome.toLowerCase().includes(p) || val.codigo.toLowerCase().includes(p))) {
+          this._produtoModeloService.filtro.nome = this.pesquisarEventoProduto;
+          this._produtoModeloService.filtro.codigo = this.pesquisarEventoProduto;
+          this._produtoModeloService.filtro.materiaPrima = 'S';
+          this._produtoModeloService.filtrar().subscribe(lista => {
+            lista.forEach(val => {
               result.push(Object.assign({}, val));
-            }
+            });
+            resolve(result);
+            return result;
           });
         }
-        resolve(result);
-        return result;
-      })
+      });
     }
   }
 
@@ -153,7 +204,7 @@ export class FormComponent implements OnInit {
     if (existe) {
       this._mensagem.erro('Item já cadastrado!');
     } else {
-      this.eventoProdutoList.push(this._serviceFormService.criarFormularioEventoProduto(ep));
+      this.eventoProdutoList.push(this._formService.criarFormularioEventoProduto(ep));
     }
     this.pesquisarEventoProduto = '';
   }
@@ -178,25 +229,26 @@ export class FormComponent implements OnInit {
   public completarEventoPessoa(event: KeyboardEvent) {
     if (
       !(
-        (event.key === "ArrowUp") ||
-        (event.key === "ArrowDown") ||
-        (event.key === "ArrowRight") ||
-        (event.key === "ArrowLeft"))
+        (event.key === 'ArrowUp') ||
+        (event.key === 'ArrowDown') ||
+        (event.key === 'ArrowRight') ||
+        (event.key === 'ArrowLeft'))
     ) {
       this.$filteredOptionsEventoPessoa = new Promise((resolve, reject) => {
-        let result = [];
+        const result = [];
         if (typeof this.pesquisarEventoPessoa === 'string' && this.pesquisarEventoPessoa.length) {
-          this._pessoaService.lista.forEach(val => {
-            let p = this.pesquisarEventoPessoa.toLowerCase();
-            if ((val.fornecedor && val.fornecedor.id) &&
-              (val.nome.toLowerCase().includes(p) || val.cpfCnpj.toLowerCase().includes(p))) {
+          this._pessoaService.filtro.nome = this.pesquisarEventoPessoa;
+          this._pessoaService.filtro.cpfCnpj = this.pesquisarEventoPessoa;
+          this._pessoaService.filtro.pessoaVinculoTipo = ['FORNECEDOR'];
+          this._pessoaService.filtrar().subscribe(lista => {
+            lista.forEach(val => {
               result.push(Object.assign({}, val));
-            }
+            });
+            resolve(result);
+            return result;
           });
         }
-        resolve(result);
-        return result;
-      })
+      });
     }
   }
 
@@ -205,10 +257,10 @@ export class FormComponent implements OnInit {
   }
 
   public adicionarEventoPessoa() {
-    let ep = new EventoPessoa();
-    ep.eventoPessoaFuncao = this._eventoPessoaFuncaoService.lista[0];
+    const ep = new EventoPessoa();
+    ep.eventoPessoaFuncao = this.eventoPessoaFuncao;
     ep.pessoa = (this.pesquisarEventoPessoa as unknown) as Pessoa;
-    let id = ep.pessoa.id;
+    const id = ep.pessoa.id;
     let existe = false;
     this.eventoPessoaList.value.forEach(e => {
       if (e.pessoa.id === id) {
@@ -218,7 +270,7 @@ export class FormComponent implements OnInit {
     if (existe) {
       this._mensagem.erro('Item já cadastrado!');
     } else {
-      this.eventoPessoaList.push(this._serviceFormService.criarFormularioEventoPessoa(ep));
+      this.eventoPessoaList.push(this._formService.criarFormularioEventoPessoa(ep));
     }
     this.pesquisarEventoPessoa = '';
   }
@@ -249,7 +301,7 @@ export class FormComponent implements OnInit {
       this.eventoPessoaList.controls.forEach(element => {
         ((element as FormGroup).controls.eventoProdutoList as FormArray).clear();
         this.eventoProdutoList.value.forEach(ep => {
-          ((element as FormGroup).controls.eventoProdutoList as FormArray).push(this._serviceFormService.criarFormularioEventoProduto(ep, true));
+          ((element as FormGroup).controls.eventoProdutoList as FormArray).push(this._formService.criarFormularioEventoProduto(ep, true));
         });
         (element as FormGroup).controls.eventoProdutoList.updateValueAndValidity();
       });

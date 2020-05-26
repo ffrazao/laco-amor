@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { EventoFormService } from '../evento/evento-form.service';
 import { InjetorEstaticoService } from './../../comum/servico/injetor-estatico.service';
-import { EventoPessoaFuncaoService } from './../evento-pessoa-funcao/evento-pessoa-funcao.service';
+import { EventoPessoaFuncaoCrudService } from './../evento-pessoa-funcao/evento-pessoa-funcao.service';
 import { EventoPessoa } from './../../comum/modelo/entidade/evento-pessoa';
 import { EventoProduto } from '../../comum/modelo/entidade/evento-produto';
 import { Comprar } from '../../comum/modelo/entidade/comprar';
@@ -13,14 +13,14 @@ import { Evento } from '../../comum/modelo/entidade/evento';
 @Injectable()
 export class ComprarFormService extends EventoFormService {
 
-  private _eventoPessoaFuncaoService: EventoPessoaFuncaoService;
+  private _eventoPessoaFuncaoService: EventoPessoaFuncaoCrudService;
 
   constructor(
     protected _formBuilder: FormBuilder,
   ) {
     super(_formBuilder);
     const injector: Injector = InjetorEstaticoService.injector;
-    this._eventoPessoaFuncaoService = injector.get<EventoPessoaFuncaoService>(EventoPessoaFuncaoService as Type<EventoPessoaFuncaoService>);
+    this._eventoPessoaFuncaoService = injector.get<EventoPessoaFuncaoCrudService>(EventoPessoaFuncaoCrudService as Type<EventoPessoaFuncaoCrudService>);
 
   }
 

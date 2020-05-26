@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { ProdutoModeloComponent } from './produto-modelo.component';
 import { ProdutoModeloRoutingModule } from './produto-modelo-routing.module';
+import { ProdutoModeloComponent } from './produto-modelo.component';
 import { ListResolve } from './list/list.resolve';
 import { FormResolve } from './form/form.resolve';
 import { FormNovoResolve } from './form/form-novo.resolve';
 import { FiltroResolve } from './filtro/filtro.resolve';
-import { ProdutoModeloService } from './produto-modelo.service';
+import { ProdutoModeloCrudService } from './produto-modelo.service';
 import { ProdutoModeloFormService } from './produto-modelo-form.service';
 import { ProdutoAtributoModule } from '../produto-atributo/produto-atributo.module';
 
@@ -20,7 +20,7 @@ import { ProdutoAtributoModule } from '../produto-atributo/produto-atributo.modu
     ProdutoAtributoModule,
   ],
   providers: [
-    ProdutoModeloService,
+    ProdutoModeloCrudService,
     ProdutoModeloFormService,
     ListResolve,
     FormResolve,

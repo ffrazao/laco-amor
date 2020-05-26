@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 
-import { gerarFormulario } from '../../../comum/ferramenta/ferramenta-comum';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ProdutoModeloService } from '../produto-modelo.service';
+import { ProdutoModeloCrudService } from '../produto-modelo.service';
+import { ProdutoModeloFormService } from '../produto-modelo-form.service';
 import { ProdutoModeloFiltroDTO } from '../../../comum/modelo/dto/produto-modelo.filtro.dto';
-import { ProdutoModelo } from 'src/app/comum/modelo/entidade/produto-modelo';
+import { deEnumParaChaveValor } from 'src/app/comum/ferramenta/ferramenta-comum';
+import { Confirmacao } from '../../../comum/modelo/dominio/confirmacao';
 
 @Component({
   selector: 'app-filtro',
@@ -16,39 +17,41 @@ export class FiltroComponent implements OnInit {
 
   public frm: FormGroup;
   public isEnviado = false;
-  public entidade: ProdutoModeloFiltroDTO;
+
+  public confirmacaoList: any;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private route: ActivatedRoute,
-    private servico: ProdutoModeloService,
-    private router: Router) { }
-
-  ngOnInit(): void {
-    this.entidade = this.servico.filtro;
-    this.frm = this.criarFormulario(this.entidade);
+    private _service: ProdutoModeloCrudService,
+    private _formService: ProdutoModeloFormService,
+    private router: Router,
+  ) {
+    this.confirmacaoList = deEnumParaChaveValor(Confirmacao);
   }
 
-  criarFormulario(entidade) {
-    if (!entidade) {
-      entidade = new ProdutoModelo();
-    }
-    const result = this.formBuilder.group(
-      {
-        nome: [entidade.nome, []],
-        codigo: [entidade.codigo, []],
-        materiaPrima: [entidade.materiaPrima, []],
-      }
-    );
-    return result;
+  ngOnInit(): void {
+    this.carregar(this._service.filtro);
   }
 
   public enviar() {
     this.isEnviado = true;
-    this.entidade = this.frm.value;
-    this.servico.filtro = this.entidade;
+    this._service.filtro = this.frm.value;
 
-    this.router.navigate(['cadastro', 'produto-modelo']);
+    this.router.navigate(['cadastro', this._service.funcionalidade]);
+  }
+
+  public carregar(f: ProdutoModeloFiltroDTO) {
+    if (!f) {
+      f = new ProdutoModeloFiltroDTO();
+    }
+    this.frm = this._formService.criarFormularioFiltro(f);
+  }
+
+  public exibeConfirmacao(v: Confirmacao) {
+    if (!v) {
+      return '';
+    }
+    const result = this.confirmacaoList.filter((i: { chave: string, valor: string }) => i.chave === v);
+    return result ? result[0].valor : '';
   }
 
 }

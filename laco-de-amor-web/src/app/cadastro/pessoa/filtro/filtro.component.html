@@ -1,7 +1,7 @@
 <form class="text-left" [formGroup]="frm" (ngSubmit)="enviar()">
 
     <p class="h5 mb-4 text-left">Filtrar</p>
-    
+
     <div class="form-group">
         <mat-form-field appearance="outline">
             <mat-label>Nome</mat-label>
@@ -16,22 +16,21 @@
 
     <div class="form-group">
         <mat-label>Tipo de Pessoa:</mat-label>
-        <mat-radio-group formControlName="tipo" aria-label="Selecione uma Opção">
+        <mat-radio-group formControlName="pessoaTipo" aria-label="Selecione uma Opção">
             <ul class="list-group">
                 <li class="list-group-item list-group-item-action">
                     <mat-radio-button value="">Todos</mat-radio-button>
                 </li>
-                <li class="list-group-item list-group-item-action">
-                    <mat-radio-button value="PF">Física</mat-radio-button>
-                </li>
-                <li class="list-group-item list-group-item-action">
-                    <mat-radio-button value="PJ">Jurídica</mat-radio-button>
+                <li class="list-group-item list-group-item-action" *ngFor="let e of pessoaTipoList">
+                    <mat-radio-button value="{{e.chave}}">
+                        {{e.valor}}
+                    </mat-radio-button>
                 </li>
             </ul>
         </mat-radio-group>
 
-        <div class="text-danger" *ngIf="isEnviado && frm.controls.tipo.invalid">
-            <div *ngIf="frm.controls.tipo.errors.required">
+        <div class="text-danger" *ngIf="isEnviado && frm.controls.pessoaTipo.invalid">
+            <div *ngIf="frm.controls.pessoaTipo.errors.required">
                 Campo obrigatório!
             </div>
         </div>
@@ -49,6 +48,39 @@
         </div>
     </div>
 
+    <div class="form-group">
+        <mat-label>Tipo de Vínculo:</mat-label>
+        <mat-radio-group aria-label="Selecione mais de uma Opção">
+            <ul class="list-group">
+                <li class="list-group-item list-group-item-action">
+                    <a (click)="marcarTodosNenhum()"> Todos/Nenhum </a>
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <mat-checkbox [(ngModel)]="cliente" [ngModelOptions]="{standalone: true}">
+                        Cliente
+                    </mat-checkbox>
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <mat-checkbox [(ngModel)]="fornecedor" [ngModelOptions]="{standalone: true}">
+                        Fornecedor
+                    </mat-checkbox>
+                </li>
+                <li class="list-group-item list-group-item-action">
+                    <mat-checkbox [(ngModel)]="parceiro" [ngModelOptions]="{standalone: true}">
+                        Parceiro
+                    </mat-checkbox>
+                </li>
+            </ul>
+        </mat-radio-group>
+    </div>
+
     <button class="btn btn-success btn-block" type="submit">Enviar</button>
+    <button class="btn btn-secondary btn-block" type="button" (click)="carregar(null)">Limpar Campos do Filtro</button>
 
 </form>
+
+<p>vl /{{frm.value | json}}/</p>
+<p>st /{{frm.status}}/</p>
+<p>er /{{frm.errors | json}}/</p>
+            <!-- 
+-->

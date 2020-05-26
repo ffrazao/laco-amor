@@ -1,28 +1,35 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterStateSnapshot } from '@angular/router';
-import { Observable } from 'rxjs';
 
-import { UnidadeMedidaService } from '../../../cadastro/unidade-medida/unidade-medida.service';
-import { CotarService } from '../cotar.service';
+import { Cotar } from '../../../comum/modelo/entidade/cotar';
+import { CotarCrudService } from '../cotar.service';
+import { UnidadeMedidaCrudService } from '../../../cadastro/unidade-medida/unidade-medida.service';
+import { EventoPessoaFuncaoCrudService } from '../../evento-pessoa-funcao/evento-pessoa-funcao.service';
 
 @Injectable()
-export class FormResolve implements Resolve<any> {
+export class FormResolve implements Resolve<Cotar> {
 
     constructor(
-        private _service: CotarService,
-        private _unidadeMedidaService: UnidadeMedidaService,
+        private _service: CotarCrudService,
+        private _unidadeMedidaService: UnidadeMedidaCrudService,
+        private _eventoPessoaFuncaoService: EventoPessoaFuncaoCrudService,
     ) {
     }
 
-    resolve(route: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot): any | Observable<any> | Promise<any> {
-        let entidade = this._service.restore(route.params['id']);
+    resolve(
+        route: ActivatedRouteSnapshot,
+        state: RouterStateSnapshot
+    ): any {
+        this._eventoPessoaFuncaoService.filtro.codigo = 'FORNECEDOR';
         return {
-            principal: entidade,
+            principal: this._service.restore(route.params.id),
             acao: 'Visualizar',
-            apoio: [this._unidadeMedidaService.lista],
+            apoio: [
+                {unidadeMedidaList: this._unidadeMedidaService.filtrar()},
+                {eventoPessoaFuncao: this._eventoPessoaFuncaoService.filtrar()}
+            ]
         };
     }
 

@@ -4,13 +4,13 @@ import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterStateSnapshot } from '@angular/router';
 
 import { Vender } from './../../../comum/modelo/entidade/vender';
-import { VenderService } from '../vender.service';
+import { VenderCrudService } from '../vender.service';
 
 @Injectable()
 export class ListResolve implements Resolve<Vender[]> {
 
     constructor(
-        private servico: VenderService
+        private servico: VenderCrudService
     ) {
     }
 
@@ -19,7 +19,7 @@ export class ListResolve implements Resolve<Vender[]> {
         state: RouterStateSnapshot
     ): any {
         return {
-            principal: this.servico.fitrar()
+            principal: this.servico.filtrar()
         };
     }
 

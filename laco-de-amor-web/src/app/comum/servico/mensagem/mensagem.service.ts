@@ -20,10 +20,22 @@ export class MensagemService {
     this.toastr.error(msg, titulo ? titulo : 'Erro!');
   }
 
+  public erroGrave(msg: string, titulo: string = null) {
+    this.toastr.error(msg, titulo ? titulo : 'Erro Grave!', {
+      tapToDismiss: false,
+      progressBar: true,
+      progressAnimation: 'decreasing',
+      timeOut: 10000,
+      disableTimeOut: false,
+      positionClass: 'toast-top-full-width',
+      enableHtml: true,
+    });
+  }
+
   public confirme(mensagem: string): Promise<boolean> {
     return new Promise(async resolve => {
       const dialogRef = await this.dialog.open(ConfirmeComponent, {
-        width: '250px',
+        width: '450px',
         data: { mensagem }
       });
 

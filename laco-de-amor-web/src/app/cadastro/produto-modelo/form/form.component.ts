@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
 
-import { ProdutoModeloService } from '../produto-modelo.service';
+import { ProdutoModeloCrudService } from '../produto-modelo.service';
 import { ProdutoModeloFormService } from '../produto-modelo-form.service';
 import { MensagemService } from '../../../comum/servico/mensagem/mensagem.service';
 import { AnexarService } from '../../../comum/servico/anexar/anexar.service';
@@ -12,7 +11,10 @@ import { ProdutoDescricao } from '../../../comum/modelo/entidade/produto-descric
 import { ProdutoPreco } from '../../../comum/modelo/entidade/produto-preco';
 import { ProdutoAtributo } from '../../../comum/modelo/entidade/produto-atributo';
 import { AnexarTipo } from '../../../comum/servico/anexar/anexar-tipo';
-import { constante } from 'src/app/comum/constante';
+import { constante } from '../../../comum/constante';
+import { removeMime, adMime, deEnumParaChaveValor } from '../../../comum/ferramenta/ferramenta-comum';
+import { ProdutoPrecoDestinacao } from '../../../comum/modelo/dominio/produto-preco-destinacao';
+import { Confirmacao } from '../../../comum/modelo/dominio/confirmacao';
 
 @Component({
   selector: 'app-form',
@@ -24,34 +26,46 @@ export class FormComponent implements OnInit {
   public frm = this._formService.criarFormulario(new ProdutoModelo());
 
   public isEnviado = false;
-  public entidade: ProdutoModelo;
   public id: number;
-  public acao: string;
+
   public SEM_IMAGEM = constante.SEM_IMAGEM;
 
   public produtoDescricaoEditando = false;
   public produtoPrecoEditando = false;
 
+  public produtoPrecoDestinacaoList: any;
+
+  public confirmacaoList: any;
+
   constructor(
-    private _service: ProdutoModeloService,
+    private _service: ProdutoModeloCrudService,
     private _formService: ProdutoModeloFormService,
+    private _route: ActivatedRoute,
+    private _router: Router,
     private _mensagem: MensagemService,
     private _anexar: AnexarService,
-    private route: ActivatedRoute,
-    private router: Router,
   ) {
+    this.produtoPrecoDestinacaoList = deEnumParaChaveValor(ProdutoPrecoDestinacao);
+    this.confirmacaoList = deEnumParaChaveValor(Confirmacao);
   }
 
   ngOnInit() {
-    this.route.params.subscribe(p => {
+    this._route.params.subscribe(p => {
       this.id = p.id;
     });
 
-    this.route.data.subscribe((info) => {
-      this.entidade = info['resolve']['principal'];
-      this.acao = !info['resolve']['acao'] ? 'Novo' : info['resolve']['acao'];
-      this.frm = this._formService.criarFormulario(this.entidade);
+    this._route.data.subscribe((info) => {
+      info.resolve.principal.subscribe((p: ProdutoModelo) => {
+        p.foto = adMime(p.foto);
+        this._service.entidade = p;
+        this._service.acao = !info.resolve.acao ? 'Novo' : info.resolve.acao;
+        this.carregar(this._service.entidade);
+      });
     });
+  }
+
+  public get acao() {
+    return this._service.acao;
   }
 
   get produtoDescricaoList(): FormArray {
@@ -71,19 +85,56 @@ export class FormComponent implements OnInit {
     this.isEnviado = true;
 
     if (this.frm.invalid) {
-      let msg = 'Dados inválidos!';
+      const msg = 'Dados inválidos!';
       this._mensagem.erro(msg);
       throw new Error(msg);
     }
 
-    this.entidade = this.frm.value;
-    if ('Novo' === this.acao) {
-      this._service.create(this.entidade);
-      this._service.lista.push(this.entidade);
-      this.router.navigate(['cadastro', 'produto-modelo', this.entidade.id]);
+    const entidade = this.frm.value;
+    entidade.foto = removeMime(entidade.foto);
+
+    if (entidade.produtoDescricaoList) {
+      for (const pd of entidade.produtoDescricaoList) {
+        if (pd.produtoAtributo && typeof pd.produtoAtributo === 'string') {
+          const nome = pd.produtoAtributo;
+          pd.produtoAtributo = new ProdutoAtributo();
+          pd.produtoAtributo.nome = nome;
+        }
+      }
+    }
+
+    if ('Novo' === this._service.acao) {
+      this._service.create(entidade).subscribe((id: number) => {
+        this._mensagem.sucesso('Novo registro efetuado!\n\nVisualizando...');
+        this._router.navigate(['cadastro', this._service.funcionalidade, id]);
+      });
     } else {
-      this._service.update(this.id, this.entidade);
-      this.router.navigate(['cadastro', 'produto-modelo']);
+      this._service.update(this.id, entidade).subscribe(() => {
+        this._mensagem.sucesso('Registro atualizado!');
+        this._router.navigate(['cadastro', this._service.funcionalidade]);
+      });
+    }
+  }
+
+  public carregar(f: ProdutoModelo) {
+    if (!f) {
+      f = new ProdutoModelo();
+    }
+    this.frm = this._formService.criarFormulario(f);
+  }
+
+  public async restaurar() {
+    if (await
+      this._mensagem.confirme(
+        `
+        <p>
+           Confirma a restauração dos dados do formulário?
+        </p>
+        <div class="alert alert-danger" role="alert">
+           Todas as modificações serão perdidas!
+        </div>
+         `)) {
+      this.carregar(this._service.entidade);
     }
   }
 
@@ -207,7 +258,7 @@ export class FormComponent implements OnInit {
   public carregarFoto(event) {
     event.preventDefault();
     this._anexar.carregar([AnexarTipo.IMAGEM], false).subscribe((v) => {
-      let foto = v['IMAGEM'][0];
+      const foto = v['IMAGEM'][0];
       this.frm.get('foto').setValue(foto);
     });
   }
@@ -215,6 +266,22 @@ export class FormComponent implements OnInit {
   public limparFoto(event) {
     event.preventDefault();
     this.frm.get('foto').setValue(null);
+  }
+
+  public exibeProdutoPrecoDestinacao(v: ProdutoPrecoDestinacao) {
+    if (!v) {
+      return '';
+    }
+    const result = this.produtoPrecoDestinacaoList.filter((i: { chave: string, valor: string }) => i.chave === v);
+    return result && result[0] ? result[0].valor : '';
+  }
+
+  public exibeConfirmacao(v: Confirmacao) {
+    if (!v) {
+      return '';
+    }
+    const result = this.confirmacaoList.filter((i: { chave: string, valor: string }) => i.chave === v);
+    return result ? result[0].valor : '';
   }
 
 }

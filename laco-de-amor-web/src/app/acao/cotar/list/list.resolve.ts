@@ -4,13 +4,13 @@ import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterStateSnapshot } from '@angular/router';
 
 import { Cotar } from './../../../comum/modelo/entidade/cotar';
-import { CotarService } from '../cotar.service';
+import { CotarCrudService } from '../cotar.service';
 
 @Injectable()
 export class ListResolve implements Resolve<Cotar[]> {
 
     constructor(
-        private servico: CotarService
+        private _service: CotarCrudService
     ) {
     }
 
@@ -18,8 +18,9 @@ export class ListResolve implements Resolve<Cotar[]> {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): any {
+        this._service.acao = 'Listar';
         return {
-            principal: this.servico.fitrar()
+            principal: this._service.filtrar()
         };
     }
 

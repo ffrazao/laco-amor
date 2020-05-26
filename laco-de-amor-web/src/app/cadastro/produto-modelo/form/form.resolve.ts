@@ -1,22 +1,20 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 
+import { ProdutoModeloCrudService } from '../produto-modelo.service';
 import { ProdutoModelo } from '../../../comum/modelo/entidade/produto-modelo';
-import { ProdutoModeloService } from '../produto-modelo.service';
 
 @Injectable()
-export class FormResolve implements Resolve<any> {
+export class FormResolve implements Resolve<ProdutoModelo> {
 
-    constructor(private servico: ProdutoModeloService) { }
+    constructor(private _service: ProdutoModeloCrudService) { }
 
-    resolve(route: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot): any | Observable<any> | Promise<any> {
-        let entidade = this.servico.restore(route.params['id']);
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): any | Observable<any> | Promise<any> {
         return {
-            principal: entidade,
+            principal: this._service.restore(route.params.id),
             acao: 'Visualizar'
         };
     }

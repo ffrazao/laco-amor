@@ -1,19 +1,22 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 
-import { PessoaService } from '../pessoa.service';
+import { PessoaCrudService } from '../pessoa.service';
 
 @Injectable()
 export class FiltroResolve implements Resolve<any> {
 
-    constructor(private servico: PessoaService) { }
+    constructor(private _service: PessoaCrudService) { }
 
-    resolve(route: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot): any | Observable<any> | Promise<any> {
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): any | Observable<any> | Promise<any> {
+
+        this._service.acao = 'Filtrar';
+
         return null;
+
     }
 
 }
