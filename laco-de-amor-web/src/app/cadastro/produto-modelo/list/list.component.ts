@@ -1,3 +1,4 @@
+import { environment } from './../../../../environments/environment';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
@@ -15,7 +16,8 @@ import { Confirmacao } from '../../../comum/modelo/dominio/confirmacao';
 })
 export class ListComponent implements OnInit {
 
-  // 'Foto', 'Nome', 'Código', 'Matéria Prima'
+  public prod = environment.production;
+
   public headElements = [
     'foto',
     'nome',
@@ -47,6 +49,10 @@ export class ListComponent implements OnInit {
         this.dataSource = new MatTableDataSource(this._service.lista);
       });
     });
+  }
+
+  public adMime(v) {
+    return adMime(v);
   }
 
   public aplicarFiltro(event: Event) {

@@ -1,3 +1,4 @@
+import { environment } from './../../../../environments/environment';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,11 +16,9 @@ import { Produto } from '../../../comum/modelo/entidade/produto';
 import { Pessoa } from '../../../comum/modelo/entidade/pessoa';
 import { UnidadeMedida } from '../../../comum/modelo/entidade/unidade-medida';
 import { constante } from '../../../comum/constante';
-import { isNumber, adMime, removeMime } from '../../../comum/ferramenta/ferramenta-comum';
-import { EventoPessoaFuncaoCrudService } from '../../evento-pessoa-funcao/evento-pessoa-funcao.service';
 import { unidadeMedidaListComparar } from '../../../comum/ferramenta/ferramenta-sistema';
-import { Confirmacao } from 'src/app/comum/modelo/dominio/confirmacao';
-import { EventoPessoaFuncao } from 'src/app/comum/modelo/entidade/evento-pessoa-funcao';
+import { EventoPessoaFuncao } from '../../../comum/modelo/entidade/evento-pessoa-funcao';
+import { isNumber, adMime, removeMime } from '../../../comum/ferramenta/ferramenta-comum';
 
 @Component({
   selector: 'app-form',
@@ -27,6 +26,8 @@ import { EventoPessoaFuncao } from 'src/app/comum/modelo/entidade/evento-pessoa-
   styleUrls: ['./form.component.scss']
 })
 export class FormComponent implements OnInit {
+
+  public prod = environment.production;
 
   public frm = this._formService.criarFormulario(new Cotar());
 
@@ -57,13 +58,24 @@ export class FormComponent implements OnInit {
     });
 
     this._route.data.subscribe((info) => {
-      this._service.acao = !info.resolve.acao ? 'Novo' : info.resolve.acao;
-
       info.resolve.principal.subscribe((p: Cotar) => {
         if (p.eventoProdutoList) {
-          p.eventoProdutoList.forEach((ep: EventoProduto) =>
-            ep.produto.produtoModelo.foto = adMime(ep.produto.produtoModelo.foto)
-          );
+          p.eventoProdutoList.forEach((ep: EventoProduto) => {
+            if (ep.produto.produtoModelo.foto) {
+              ep.produto.produtoModelo.foto = adMime(ep.produto.produtoModelo.foto);
+            }
+          });
+        }
+        if (p.eventoPessoaList) {
+          p.eventoPessoaList.forEach((ep: EventoPessoa) => {
+            if (ep.eventoProdutoList) {
+              ep.eventoProdutoList.forEach((ep1: EventoProduto) => {
+                if (ep1.produto.produtoModelo.foto) {
+                  ep1.produto.produtoModelo.foto = adMime(ep1.produto.produtoModelo.foto);
+                }
+              });
+            }
+          });
         }
         this._service.entidade = p;
         this.carregar(this._service.entidade);
@@ -98,6 +110,8 @@ export class FormComponent implements OnInit {
 
     if (this.frm.invalid) {
       const msg = 'Dados inválidos!';
+      console.error(this.frm);
+      console.error(this.frm);
       this._mensagem.erro(msg);
       throw new Error(msg);
     }
@@ -107,6 +121,13 @@ export class FormComponent implements OnInit {
       entidade.eventoProdutoList.forEach((ep: EventoProduto) =>
         ep.produto.produtoModelo.foto = removeMime(ep.produto.produtoModelo.foto)
       );
+    }
+    if (entidade.eventoPessoaList) {
+      entidade.eventoPessoaList.forEach((ep: EventoPessoa) => {
+        if (ep.eventoProdutoList) {
+          ep.eventoProdutoList.forEach((epp: EventoProduto) => epp.produto.produtoModelo.foto = removeMime(epp.produto.produtoModelo.foto));
+        }
+      });
     }
 
     if ('Novo' === this._service.acao) {
@@ -142,6 +163,10 @@ export class FormComponent implements OnInit {
          `)) {
       this.carregar(this._service.entidade);
     }
+  }
+
+  public adMime(v) {
+    return adMime(v);
   }
 
   // GESTÃO DOS PRODUTOS A COTAR
@@ -218,9 +243,9 @@ export class FormComponent implements OnInit {
     return pessoa ? `${pessoa.nome} (${pessoa.cpfCnpj})` : '';
   }
 
-  pesquisarEventoPessoa = '';
+  public pesquisarEventoPessoa = '';
 
-  $filteredOptionsEventoPessoa = new Promise((resolve, reject) => {
+  public $filteredOptionsEventoPessoa = new Promise((resolve, reject) => {
     let result = [];
     resolve(result);
     return result;

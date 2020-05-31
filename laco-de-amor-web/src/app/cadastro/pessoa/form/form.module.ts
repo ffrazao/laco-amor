@@ -1,3 +1,4 @@
+import { MatIconModule } from '@angular/material/icon';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -10,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 
 import { FormRoutingModule } from './form-routing.module';
 import { FormComponent } from './form.component';
+import { PipeModule } from '../../../comum/pipe/pipe.module';
 
 @NgModule({
   declarations: [FormComponent],
@@ -25,6 +27,8 @@ import { FormComponent } from './form.component';
     MatSelectModule,
     MatRadioModule,
     MatButtonModule,
+    MatIconModule,
+    PipeModule,
   ]
 })
 export class FormModule { }

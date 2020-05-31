@@ -1,41 +1,39 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 import { Resolve } from '@angular/router';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterStateSnapshot } from '@angular/router';
-import { Observable } from 'rxjs';
 
 import { ComprarCrudService } from '../comprar.service';
 import { UnidadeMedidaCrudService } from '../../../cadastro/unidade-medida/unidade-medida.service';
+import { EventoPessoaFuncaoCrudService } from '../../evento-pessoa-funcao/evento-pessoa-funcao.service';
+import { Comprar } from '../../../comum/modelo/entidade/comprar';
 import { CotarCrudService } from '../../cotar/cotar.service';
-import { EventoTipoCrudService } from '../../../cadastro/evento-tipo/evento-tipo.service';
-import { hojeStr } from '../../../comum/ferramenta/ferramenta-comum';
-import { Comprar } from 'src/app/comum/modelo/entidade/comprar';
 
 @Injectable()
-export class FormNovoResolve implements Resolve<any> {
+export class FormNovoResolve implements Resolve<Comprar> {
 
     constructor(
         private _service: ComprarCrudService,
         private _unidadeMedidaService: UnidadeMedidaCrudService,
+        private _eventoPessoaFuncaoService: EventoPessoaFuncaoCrudService,
         private _cotarService: CotarCrudService,
-        private _eventoTipoService: EventoTipoCrudService,
     ) {
     }
 
-    resolve(route: ActivatedRouteSnapshot,
-        state: RouterStateSnapshot): any | Observable<any> | Promise<any> {
-        const entidade = new Comprar();
-
-        entidade.data = hojeStr();
-        //entidade.eventoTipo = this._eventoTipoService.restore(2);
-
+    resolve(
+        route: ActivatedRouteSnapshot,
+        state: RouterStateSnapshot
+    ): any {
+        this._service.acao = 'Novo';
+        this._eventoPessoaFuncaoService.filtro.codigo = 'FORNECEDOR';
+        this._cotarService.filtro.utilizado = 'N';
         return {
-            principal: this._service.novo(entidade),
-            acao: 'Novo',
+            principal: this._service.novo(null),
             apoio: [
-                this._unidadeMedidaService.lista,
-                this._cotarService.lista,
-            ],
+                {unidadeMedidaList: this._unidadeMedidaService.filtrar()},
+                {eventoPessoaFuncao: this._eventoPessoaFuncaoService.filtrar()},
+                {cotacaoList: this._cotarService.filtrar()},
+            ]
         };
     }
 

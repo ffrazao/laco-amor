@@ -1,3 +1,4 @@
+import { environment } from './../../../../environments/environment';
 import { Component, OnInit } from '@angular/core';
 import { FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -22,6 +23,8 @@ import { Confirmacao } from '../../../comum/modelo/dominio/confirmacao';
   styleUrls: ['./form.component.scss']
 })
 export class FormComponent implements OnInit {
+
+  public prod = environment.production;
 
   public frm = this._formService.criarFormulario(new ProdutoModelo());
 
@@ -58,7 +61,6 @@ export class FormComponent implements OnInit {
       info.resolve.principal.subscribe((p: ProdutoModelo) => {
         p.foto = adMime(p.foto);
         this._service.entidade = p;
-        this._service.acao = !info.resolve.acao ? 'Novo' : info.resolve.acao;
         this.carregar(this._service.entidade);
       });
     });
@@ -86,6 +88,7 @@ export class FormComponent implements OnInit {
 
     if (this.frm.invalid) {
       const msg = 'Dados inválidos!';
+      console.error(this.frm);
       this._mensagem.erro(msg);
       throw new Error(msg);
     }
@@ -136,6 +139,10 @@ export class FormComponent implements OnInit {
          `)) {
       this.carregar(this._service.entidade);
     }
+  }
+
+  public adMime(v) {
+    return adMime(v);
   }
 
   public ordenadoProdutoDescricao(lista) {

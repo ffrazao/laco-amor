@@ -3,10 +3,10 @@ import { Resolve } from '@angular/router';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { RouterStateSnapshot } from '@angular/router';
 
-import { Cotar } from '../../../comum/modelo/entidade/cotar';
 import { CotarCrudService } from '../cotar.service';
 import { UnidadeMedidaCrudService } from '../../../cadastro/unidade-medida/unidade-medida.service';
 import { EventoPessoaFuncaoCrudService } from '../../evento-pessoa-funcao/evento-pessoa-funcao.service';
+import { Cotar } from '../../../comum/modelo/entidade/cotar';
 
 @Injectable()
 export class FormNovoResolve implements Resolve<Cotar> {
@@ -22,10 +22,10 @@ export class FormNovoResolve implements Resolve<Cotar> {
         route: ActivatedRouteSnapshot,
         state: RouterStateSnapshot
     ): any {
+        this._service.acao = 'Novo';
         this._eventoPessoaFuncaoService.filtro.codigo = 'FORNECEDOR';
         return {
             principal: this._service.novo(null),
-            acao: 'Novo',
             apoio: [
                 {unidadeMedidaList: this._unidadeMedidaService.filtrar()},
                 {eventoPessoaFuncao: this._eventoPessoaFuncaoService.filtrar()}

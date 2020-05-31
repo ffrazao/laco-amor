@@ -1,3 +1,4 @@
+import { environment } from './../../../../environments/environment';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,6 +14,7 @@ import { PessoaEndereco } from '../../../comum/modelo/entidade/pessoa-endereco';
 import { deEnumParaChaveValor } from '../../../comum/ferramenta/ferramenta-comum';
 import { ParceiroFuncao } from './../../../comum/modelo/dominio/parceiro-funcao';
 import { PessoaTipo } from '../../../comum/modelo/dominio/pessoa-tipo';
+import { ConsultaCepService, Cep } from 'src/app/comum/servico/consulta-cep.service';
 
 @Component({
   selector: 'app-form',
@@ -20,6 +22,8 @@ import { PessoaTipo } from '../../../comum/modelo/dominio/pessoa-tipo';
   styleUrls: ['./form.component.scss']
 })
 export class FormComponent implements OnInit {
+
+  public prod = environment.production;
 
   public frm: FormGroup = this._formService.criarFormulario(new Pessoa());
 
@@ -41,6 +45,7 @@ export class FormComponent implements OnInit {
     private _route: ActivatedRoute,
     private _router: Router,
     private _mensagem: MensagemService,
+    private _consultaCepService: ConsultaCepService,
   ) {
     this.parceiroFuncaoList = deEnumParaChaveValor(ParceiroFuncao);
     this.pessoaTipoList = deEnumParaChaveValor(PessoaTipo);
@@ -52,8 +57,6 @@ export class FormComponent implements OnInit {
     });
 
     this._route.data.subscribe((info) => {
-      this._service.acao = !info.resolve.acao ? 'Novo' : info.resolve.acao;
-
       info.resolve.principal.subscribe((p: Pessoa) => {
         this._service.entidade = p;
         this.carregar(this._service.entidade);
@@ -75,6 +78,7 @@ export class FormComponent implements OnInit {
 
     if (this.frm.invalid) {
       const msg = 'Dados inválidos!';
+      console.error(this.frm);
       this._mensagem.erro(msg);
       throw new Error(msg);
     }
@@ -216,6 +220,19 @@ export class FormComponent implements OnInit {
     }
     this.frm.setControl('parceiro', this._formService.criarFormularioParceiro(v));
     this._parceiro = is;
+  }
+
+  public buscaCep(endereco: FormGroup) {
+    const cep = endereco.value.cep;
+    this._consultaCepService.buscarPorCep(cep)
+      .then((r: Cep) => {
+        endereco.controls.logradouro.setValue(r.logradouro);
+        endereco.controls.bairro.setValue(r.bairro);
+        endereco.controls.cidade.setValue(r.localidade);
+        endereco.controls.uf.setValue(r.uf);
+        endereco.controls.cep.setValue(r.cep);
+      })
+      .catch(e => this._mensagem.erro(`CEP: ${cep} -> ${e}`));
   }
 
 }

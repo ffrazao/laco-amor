@@ -1,4 +1,4 @@
-import { Endereco } from './../../../comum/modelo/entidade/endereco';
+import { environment } from './../../../../environments/environment';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { constante } from '../../../comum/constante';
 import { VenderCrudService } from '../vender.service';
 import { VenderFormService } from '../vender-form.service';
+import { EventoPessoaFuncaoCrudService } from '../../evento-pessoa-funcao/evento-pessoa-funcao.service';
 import { MensagemService } from '../../../comum/servico/mensagem/mensagem.service';
 import { ProdutoModeloCrudService } from '../../../cadastro/produto-modelo/produto-modelo.service';
 import { PessoaCrudService } from '../../../cadastro/pessoa/pessoa.service';
@@ -16,8 +17,17 @@ import { ProdutoModelo } from '../../../comum/modelo/entidade/produto-modelo';
 import { Produto } from '../../../comum/modelo/entidade/produto';
 import { UnidadeMedida } from '../../../comum/modelo/entidade/unidade-medida';
 import { Pessoa } from '../../../comum/modelo/entidade/pessoa';
-import { EventoPessoaFuncaoCrudService } from '../../evento-pessoa-funcao/evento-pessoa-funcao.service';
-import { eventoPessoaListComparar, unidadeMedidaListComparar, eventoProdutoListComparar, pessoaListComparar, pessoaEnderecoListComparar } from '../../../comum/ferramenta/ferramenta-sistema';
+import { Endereco } from './../../../comum/modelo/entidade/endereco';
+import {
+  eventoPessoaListComparar,
+  unidadeMedidaListComparar,
+  eventoProdutoListComparar,
+  pessoaListComparar,
+  pessoaEnderecoListComparar
+} from '../../../comum/ferramenta/ferramenta-sistema';
+import { EventoPessoaFuncao } from '../../../comum/modelo/entidade/evento-pessoa-funcao';
+import { adMime, removeMime } from '../../../comum/ferramenta/ferramenta-comum';
+
 
 @Component({
   selector: 'app-form',
@@ -26,15 +36,17 @@ import { eventoPessoaListComparar, unidadeMedidaListComparar, eventoProdutoListC
 })
 export class FormComponent implements OnInit {
 
+  public prod = environment.production;
+
   public frm = this._formService.criarFormulario(new Vender());
 
   public isEnviado = false;
-  public entidade: Vender;
   public id: number;
 
   public SEM_IMAGEM = constante.SEM_IMAGEM;
 
   public unidadeMedidaList: UnidadeMedida[] = [];
+  private eventoPessoaFuncao;
   public eventoProdutoEditando = false;
 
   constructor(
@@ -53,12 +65,39 @@ export class FormComponent implements OnInit {
     this._route.params.subscribe(p => {
       this.id = p.id;
     });
-    this._route.data.subscribe((info) => {
-      this.entidade = info['resolve']['principal'];
-      this._service.acao = !info['resolve']['acao'] ? 'Novo' : info['resolve']['acao'];
-      this.frm = this._formService.criarFormulario(this.entidade);
 
-      this.unidadeMedidaList = info['resolve']['apoio'][0];
+    this._route.data.subscribe((info) => {
+      info.resolve.principal.subscribe((p: Vender) => {
+        if (p.eventoProdutoList) {
+          p.eventoProdutoList.forEach((ep: EventoProduto) => {
+            if (ep.produto.produtoModelo.foto) {
+              ep.produto.produtoModelo.foto = adMime(ep.produto.produtoModelo.foto);
+            }
+          });
+        }
+        if (p.eventoPessoaList) {
+          p.eventoPessoaList.forEach((ep: EventoPessoa) => {
+            if (ep.eventoProdutoList) {
+              ep.eventoProdutoList.forEach((ep1: EventoProduto) => {
+                if (ep1.produto.produtoModelo.foto) {
+                  ep1.produto.produtoModelo.foto = adMime(ep1.produto.produtoModelo.foto);
+                }
+              });
+            }
+          });
+        }
+        this._service.entidade = p;
+        this.carregar(this._service.entidade);
+      });
+
+      info.resolve.apoio[0].unidadeMedidaList.subscribe((a: UnidadeMedida[]) => {
+        this.unidadeMedidaList.length = 0;
+        a.forEach(aa => this.unidadeMedidaList.push(aa));
+      });
+
+      info.resolve.apoio[1].eventoPessoaFuncao.subscribe((a: EventoPessoaFuncao[]) => {
+        this.eventoPessoaFuncao = a[0];
+      });
     });
   }
 
@@ -66,33 +105,76 @@ export class FormComponent implements OnInit {
     return this._service.acao;
   }
 
-  get eventoPessoaList() {
-    return this.frm.get('eventoPessoaList') as FormArray;
-  }
-
   get eventoProdutoList() {
     return this.frm.get('eventoProdutoList') as FormArray;
+  }
+
+  get eventoPessoaList() {
+    return this.frm.get('eventoPessoaList') as FormArray;
   }
 
   public enviar(event) {
     event.preventDefault();
     this.isEnviado = true;
 
-    console.log(this.frm);
-
     if (this.frm.invalid) {
-      let msg = 'Dados inválidos!';
+      const msg = 'Dados inválidos!';
+      console.error(this.frm);
       this._mensagem.erro(msg);
       throw new Error(msg);
     }
-    this.entidade = this.frm.value;
-    if ('Novo' === this._service.acao) {
-      this._service.create(this.entidade);
-      this._router.navigate(['acao', 'vender', this.entidade.id]);
-    } else {
-      this._service.update(this.id, this.entidade);
-      this._router.navigate(['acao', 'vender']);
+
+    const entidade = this.frm.value;
+    if (entidade.eventoProdutoList) {
+      entidade.eventoProdutoList.forEach((ep: EventoProduto) =>
+        ep.produto.produtoModelo.foto = removeMime(ep.produto.produtoModelo.foto)
+      );
     }
+    if (entidade.eventoPessoaList) {
+      entidade.eventoPessoaList.forEach((ep: EventoPessoa) => {
+        if (ep.eventoProdutoList) {
+          ep.eventoProdutoList.forEach((epp: EventoProduto) => epp.produto.produtoModelo.foto = removeMime(epp.produto.produtoModelo.foto));
+        }
+      });
+    }
+
+    if ('Novo' === this._service.acao) {
+      this._service.create(entidade).subscribe((id: number) => {
+        this._mensagem.sucesso('Novo registro efetuado!\n\nVisualizando...');
+        this._router.navigate(['acao', this._service.funcionalidade, id]);
+      });
+    } else {
+      this._service.update(this.id, entidade).subscribe(() => {
+        this._mensagem.sucesso('Registro atualizado!');
+        this._router.navigate(['acao', this._service.funcionalidade]);
+      });
+    }
+  }
+
+  public carregar(f: Vender) {
+    if (!f) {
+      f = new Vender();
+    }
+    this.frm = this._formService.criarFormulario(f);
+  }
+
+  public async restaurar() {
+    if (await
+      this._mensagem.confirme(
+        `
+        <p>
+           Confirma a restauração dos dados do formulário?
+        </p>
+        <div class="alert alert-danger" role="alert">
+           Todas as modificações serão perdidas!
+        </div>
+         `)) {
+      this.carregar(this._service.entidade);
+    }
+  }
+
+  public adMime(v) {
+    return adMime(v);
   }
 
   public novoEventoProduto(event) {
@@ -226,9 +308,9 @@ export class FormComponent implements OnInit {
     return pessoa ? `${pessoa.nome} (${pessoa.cpfCnpj})` : '';
   }
 
-  pesquisarEventoPessoa = '';
+  public pesquisarEventoPessoa = '';
 
-  $filteredOptionsEventoPessoa = new Promise((resolve, reject) => {
+  public $filteredOptionsEventoPessoa = new Promise((resolve, reject) => {
     let result = [];
     resolve(result);
     return result;
@@ -237,46 +319,38 @@ export class FormComponent implements OnInit {
   public completarEventoPessoa(event: KeyboardEvent) {
     if (
       !(
-        (event.key === "ArrowUp") ||
-        (event.key === "ArrowDown") ||
-        (event.key === "ArrowRight") ||
-        (event.key === "ArrowLeft"))
+        (event.key === 'ArrowUp') ||
+        (event.key === 'ArrowDown') ||
+        (event.key === 'ArrowRight') ||
+        (event.key === 'ArrowLeft'))
     ) {
       this.$filteredOptionsEventoPessoa = new Promise((resolve, reject) => {
-        let result = [];
-        // if (typeof this.pesquisarEventoPessoa === 'string' && this.pesquisarEventoPessoa.length) {
-        //   this._pessoaService.lista.forEach(val => {
-        //     let p = this.pesquisarEventoPessoa.toLowerCase();
-        //     if ((val.cliente && val.cliente.id) &&
-        //       (val.nome.toLowerCase().includes(p) || val.cpfCnpj.toLowerCase().includes(p))) {
-        //       result.push(Object.assign({}, val));
-        //     }
-        //   });
-        // }
+        const result = [];
         if (typeof this.frm.value.eventoPessoaList[0].pessoa === 'string' && this.frm.value.eventoPessoaList[0].pessoa.length) {
-          this._pessoaService.lista.forEach(val => {
-            let p = this.frm.value.eventoPessoaList[0].pessoa.toLowerCase();
-            if ((val.cliente && val.cliente.id) &&
-              (val.nome.toLowerCase().includes(p) || val.cpfCnpj.toLowerCase().includes(p))) {
+          this._pessoaService.filtro.nome = this.frm.value.eventoPessoaList[0].pessoa;
+          this._pessoaService.filtro.cpfCnpj = this.frm.value.eventoPessoaList[0].pessoa;
+          this._pessoaService.filtro.pessoaVinculoTipo = ['CLIENTE'];
+          this._pessoaService.filtrar().subscribe(lista => {
+            lista.forEach(val => {
               result.push(Object.assign({}, val));
-            }
+            });
+            resolve(result);
+            return result;
           });
         }
-        resolve(result);
-        return result;
       });
     }
   }
 
   public podeAdicionarEventoPessoa() {
-    return typeof this.pesquisarEventoPessoa === 'string';
+    return typeof this.frm.value.eventoPessoaList[0].pessoa === 'string';
   }
 
   public adicionarEventoPessoa(entidade: FormGroup) {
-    let ep = new EventoPessoa();
+    const ep = new EventoPessoa();
     ep.eventoPessoaFuncao = this._eventoPessoaFuncaoService.lista[0];
-    ep.pessoa = (this.pesquisarEventoPessoa as unknown) as Pessoa;
-    let id = ep.pessoa.id;
+    ep.pessoa = (this.frm.value.eventoPessoaList[0].pessoa as unknown) as Pessoa;
+    const id = ep.pessoa.id;
     let existe = false;
     this.frm.get('eventoPessoaList').value.forEach(e => {
       if (e.pessoa.id === id) {
@@ -289,7 +363,6 @@ export class FormComponent implements OnInit {
       this.frm.get('eventoPessoaList').value.push(ep);
     }
     entidade.get('eventoPessoa').setValue(ep);
-    this.pesquisarEventoPessoa = '';
   }
 
 }

@@ -6,7 +6,7 @@
         <mat-label>Cotação</mat-label>
         <mat-select [(ngModel)]="cotacao" [ngModelOptions]="{standalone: true}" [compareWith]="cotacaoListComparar">
             <mat-option *ngFor="let option of cotacaoList" [value]="option">
-                {{option.data}}
+                {{option.data | date: 'dd/MM/yyyy HH:mm'}}
             </mat-option>
         </mat-select>
     </mat-form-field>
@@ -17,7 +17,7 @@
     <div class="form-group">
         <mat-form-field appearance="outline">
             <mat-label>Data</mat-label>
-            <input matInput placeholder="Data da Compra" formControlName="data">
+            <input matInput type="datetime-local" placeholder="Data da Compra" formControlName="data">
         </mat-form-field>
         <div class="text-danger" *ngIf="isEnviado && frm.controls.data.invalid">
             <div *ngIf="frm.controls.data.errors?.required">
@@ -25,6 +25,7 @@
             </div>
         </div>
     </div>
+
     <div class="form-group">
         <div class="container">
             <div class="row">
@@ -78,7 +79,7 @@
                                             {{i+1}}
                                         </td>
                                         <td>
-                                            <img [src]="el?.value?.produto?.produtoModelo?.foto ? el?.value?.produto?.produtoModelo?.foto : SEM_IMAGEM"
+                                            <img [src]="el?.value?.produto?.produtoModelo?.foto ? adMime(el?.value?.produto?.produtoModelo?.foto) : SEM_IMAGEM"
                                                 class="rounded mx-auto d-block"
                                                 style="max-height: 100px; max-width: 100px;">
                                         </td>
@@ -154,6 +155,9 @@
                                                     <div *ngIf="el.controls.quantidade.errors?.required">
                                                         Campo obrigatório!
                                                     </div>
+                                                    <div *ngIf="el.controls.quantidade.errors?.min">
+                                                        Valor inválido!
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
@@ -188,6 +192,9 @@
                                                     *ngIf="isEnviado && el.controls.valorUnitario.invalid">
                                                     <div *ngIf="el.controls.valorUnitario.errors?.required">
                                                         Campo obrigatório!
+                                                    </div>
+                                                    <div *ngIf="el.controls.valorUnitario.errors?.min">
+                                                        Valor inválido!
                                                     </div>
                                                 </div>
                                             </div>
@@ -236,13 +243,18 @@
         </div>
     </div>
 
-    <!-- 
-    <p>vl /{{frm.value | json}}/</p>
-    <p>st /{{frm.status}}/</p>
-    <p>er /{{frm.errors | json}}/</p>
-    <p>cotacao /{{cotacao?.eventoPessoaList[0]?.eventoProdutoList | json}}/</p>
-    <p>pai /{{frm.value?.pai?.eventoPessoaList[0]?.eventoProdutoList | json}}/</p>
-    -->
-
     <button type="submit" class="btn btn-success btn-block">Enviar</button>
+    <button class="btn btn-secondary btn-block" type="button" (click)="restaurar()" *ngIf="!frm.pristine">Restaurar Dados do Formulário</button>
+
 </form>
+
+<div class="alert alert-warning mt-5" role="alert" *ngIf="!prod">
+    <p><b>prod: {{prod}}</b></p>
+    <p>st /{{frm.status}}/</p>
+    <div>er
+        <pre [innerHTML]="frm.errors | jsonFormat"></pre>
+    </div>
+    <div><a [cdkCopyToClipboard]="frm.value | json">vl</a>
+        <pre [innerHTML]="frm.value | jsonFormat"></pre>
+    </div>
+</div>

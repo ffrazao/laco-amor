@@ -8,8 +8,10 @@ export class Evento implements EntidadeId {
     public id: number;
     public eventoTipo: EventoTipo;
     public data: string;
+    public paiId: number;
     public pai: Evento;
     public eventoPessoaList: EventoPessoa[] = [];
     public eventoProdutoList: EventoProduto[] = [];
+    public eventoProdutoListTotal: number;
 
 }

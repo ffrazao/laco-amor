@@ -17,6 +17,10 @@ import { AuthGuardService } from './comum/servico/auth-guard/auth-guard';
 import { AutorizarTrocarSenhaResolve } from './autorizar-trocar-senha/autorizar-trocar-senha.resolve';
 import { TrocarSenhaResolve } from './trocar-senha/trocar-senha.resolve';
 import { ErrorIntercept } from './comum/servico/erro/error-intercept';
+import { HttpConfigInterceptor } from './comum/servico/interceptor/httpconfig.interceptor';
+import { ServicoModule } from './comum/servico/servico.module';
+import { PipeModule } from './comum/pipe/pipe.module';
+import { MirrorModule } from './comum/componente/mirror/mirror.module';
 
 registerLocaleData(localePt, 'pt-BR');
 
@@ -34,6 +38,9 @@ registerLocaleData(localePt, 'pt-BR');
     AppRoutingModule,
     MenuModule,
     RodapeModule,
+    MirrorModule,
+    ServicoModule,
+    PipeModule,
   ],
   exports: [
     MensagemModule,
@@ -49,6 +56,10 @@ registerLocaleData(localePt, 'pt-BR');
       provide: HTTP_INTERCEPTORS,
       useClass: ErrorIntercept,
       multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpConfigInterceptor, multi: true
     },
     {
       provide: LOCALE_ID,

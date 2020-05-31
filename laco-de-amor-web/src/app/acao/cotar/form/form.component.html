@@ -5,7 +5,7 @@
     <div class="form-group">
         <mat-form-field appearance="outline">
             <mat-label>Data</mat-label>
-            <input matInput type="datetime-local" placeholder="Data Cotação" formControlName="data">
+            <input matInput type="datetime-local" placeholder="Data da Cotação" formControlName="data">
         </mat-form-field>
         <div class="text-danger" *ngIf="isEnviado && frm.controls.data.invalid">
             <div *ngIf="frm.controls.data.errors?.required">
@@ -67,7 +67,7 @@
                                                     {{i+1}}
                                                 </td>
                                                 <td>
-                                                    <img [src]="el.value.produto.produtoModelo.foto ? el.value.produto.produtoModelo.foto : SEM_IMAGEM"
+                                                    <img [src]="el.value.produto.produtoModelo.foto ? adMime(el.value.produto.produtoModelo.foto) : SEM_IMAGEM"
                                                         class="rounded mx-auto d-block"
                                                         style="max-height: 100px; max-width: 100px;">
                                                 </td>
@@ -280,7 +280,7 @@
                                     {{j+1}}
                                 </td>
                                 <td>
-                                    <img [src]="p.value.produto.produtoModelo.foto ? p.value.produto.produtoModelo.foto : SEM_IMAGEM"
+                                    <img [src]="p.value.produto.produtoModelo.foto ? adMime(p.value.produto.produtoModelo.foto) : SEM_IMAGEM"
                                         class="rounded mx-auto d-block" style="max-height: 100px; max-width: 100px;">
                                 </td>
                                 <td>{{p.value.produto.produtoModelo.nome}} ({{p.value.produto.produtoModelo.codigo}})
@@ -295,6 +295,9 @@
                                         <div class="text-danger" *ngIf="isEnviado && p.controls.quantidade.invalid">
                                             <div *ngIf="p.controls.quantidade.errors?.required">
                                                 Campo obrigatório!
+                                            </div>
+                                            <div *ngIf="p.controls.quantidade.errors?.min">
+                                                Valor inválido!
                                             </div>
                                         </div>
                                     </div>
@@ -328,6 +331,9 @@
                                             <div *ngIf="p.controls.valorUnitario.errors?.required">
                                                 Campo obrigatório!
                                             </div>
+                                            <div *ngIf="p.controls.valorUnitario.errors?.min">
+                                                Valor inválido!
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -352,7 +358,8 @@
                                 <th class="text-right" colspan="6">Total da cotação {{i + 1}} do fornecedor
                                     {{el.value.pessoa.nome}}
                                 </th>
-                                <th class="text-right">{{el.value.eventoProdutoListTotal | currency:'BRL':'symbol'}}</th>
+                                <th class="text-right">{{el.value.eventoProdutoListTotal | currency:'BRL':'symbol'}}
+                                </th>
                             </tr>
                         </tfoot>
                     </table>
@@ -361,13 +368,19 @@
         </mat-tab>
     </mat-tab-group>
 
-    <p>vl /{{frm.value | json}}/</p>
-    <p>st /{{frm.status}}/</p>
-    <p>er /{{frm.errors | json}}/</p>
-                <!-- 
-    -->
-
     <button type="submit" class="btn btn-success btn-block">Enviar</button>
-    <button class="btn btn-secondary btn-block" type="button" (click)="restaurar()" *ngIf="!frm.pristine">Restaurar Dados do Formulário</button>
+    <button class="btn btn-secondary btn-block" type="button" (click)="restaurar()" *ngIf="!frm.pristine">Restaurar
+        Dados do Formulário</button>
 
 </form>
+
+<div class="alert alert-warning mt-5" role="alert" *ngIf="!prod">
+    <p><b>prod: {{prod}}</b></p>
+    <p>st /{{frm.status}}/</p>
+    <div>er
+        <pre [innerHTML]="frm.errors | jsonFormat"></pre>
+    </div>
+    <div>vl
+        <pre [innerHTML]="frm.value | jsonFormat"></pre>
+    </div>
+</div>
