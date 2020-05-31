@@ -9,7 +9,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.frazao.lacodeamorrest.modelo.entidade.EntidadeBase;
+import com.frazao.lacodeamorrest.modelo.entidade.EntidadeBaseTemId;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,8 +19,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "cliente")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class Cliente extends EntidadeBase {
+@EqualsAndHashCode(callSuper = false, of = "id")
+public class Cliente extends EntidadeBaseTemId<Integer> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -33,5 +33,14 @@ public class Cliente extends EntidadeBase {
 	@OneToOne
 	@JsonIgnore
 	private Pessoa pessoa;
+
+	public Cliente(final Integer id) {
+		super(id);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Id = %d", this.getId());
+	}
 
 }

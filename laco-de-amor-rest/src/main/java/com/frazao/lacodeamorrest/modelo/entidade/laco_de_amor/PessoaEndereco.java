@@ -21,8 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "pessoa_endereco")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-
+@EqualsAndHashCode(callSuper = false, of = "id")
 public class PessoaEndereco extends EntidadeBaseTemId<Integer> {
 
 	private static final long serialVersionUID = 1L;
@@ -40,5 +39,14 @@ public class PessoaEndereco extends EntidadeBaseTemId<Integer> {
 	@ManyToOne
 	@JoinColumn(name = "pessoa_id")
 	private Pessoa pessoa;
+
+	public PessoaEndereco(final Integer id) {
+		super(id);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Id = %d", this.getId());
+	}
 
 }

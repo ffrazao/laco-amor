@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-
 public class OauthCode implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -25,5 +24,10 @@ public class OauthCode implements Serializable {
 
 	@Column(name = "code")
 	private String code;
+
+	@Override
+	public String toString() {
+		return String.format("Code = %d", this.getCode());
+	}
 
 }

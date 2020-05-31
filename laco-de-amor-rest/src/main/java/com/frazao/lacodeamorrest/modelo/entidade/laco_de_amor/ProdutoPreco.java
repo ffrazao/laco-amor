@@ -26,19 +26,19 @@ import lombok.NoArgsConstructor;
 @Table(schema = "laco_de_amor", name = "produto_preco")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false, of = "id")
 public class ProdutoPreco extends EntidadeBaseTemId<Integer> {
 
 	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private Integer id;
 
 	@Column(name = "destinacao")
 	@Enumerated(EnumType.STRING)
 	private ProdutoPrecoDestinacao destinacao;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
+	private Integer id;
 
 	@JsonIgnore
 	@ManyToOne
@@ -50,6 +50,10 @@ public class ProdutoPreco extends EntidadeBaseTemId<Integer> {
 
 	@Column(name = "vigencia")
 	private LocalDate vigencia;
+
+	public ProdutoPreco(final Integer id) {
+		super(id);
+	}
 
 	@Override
 	public String toString() {

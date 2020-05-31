@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-
 public class OauthRefreshToken implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -29,5 +28,10 @@ public class OauthRefreshToken implements Serializable {
 
 	@Column(name = "token_id")
 	private String tokenId;
+
+	@Override
+	public String toString() {
+		return String.format("Token = %d", this.getToken());
+	}
 
 }

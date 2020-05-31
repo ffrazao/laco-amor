@@ -1,6 +1,7 @@
 package com.frazao.lacodeamorrest.modelo.entidade.laco_de_amor;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,18 +26,10 @@ import lombok.NoArgsConstructor;
 @Table(schema = "laco_de_amor", name = "produto_modelo")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false, of = "id")
 public class ProdutoModelo extends EntidadeBaseTemId<Integer> {
 
 	private static final long serialVersionUID = 1L;
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private Integer id;
-	
-	@Column(name = "nome")
-	private String nome;
 
 	@Column(name = "codigo")
 	private String codigo;
@@ -45,16 +38,28 @@ public class ProdutoModelo extends EntidadeBaseTemId<Integer> {
 	@Lob
 	private byte[] foto;
 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
+	private Integer id;
+
 	@Column(name = "materia_prima")
 	@Enumerated(EnumType.STRING)
 	private Confirmacao materiaPrima;
 
-	@OneToMany(mappedBy = "produtoModelo", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<ProdutoDescricao> produtoDescricaoList;
+	@Column(name = "nome")
+	private String nome;
 
 	@OneToMany(mappedBy = "produtoModelo", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<ProdutoPreco> produtoPrecoList;
-	
+	private Collection<ProdutoDescricao> produtoDescricaoList = new ArrayList<>();
+
+	@OneToMany(mappedBy = "produtoModelo", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Collection<ProdutoPreco> produtoPrecoList = new ArrayList<>();
+
+	public ProdutoModelo(final Integer id) {
+		super(id);
+	}
+
 	@Override
 	public String toString() {
 		return String.format("%s", this.id);

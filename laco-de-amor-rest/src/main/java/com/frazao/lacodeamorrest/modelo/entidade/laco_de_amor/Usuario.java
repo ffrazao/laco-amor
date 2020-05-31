@@ -26,8 +26,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "usuario")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-
+@EqualsAndHashCode(callSuper = false, of = "id")
 public class Usuario extends EntidadeBaseTemId<Integer> {
 
 	private static final long serialVersionUID = 1L;
@@ -70,8 +69,17 @@ public class Usuario extends EntidadeBaseTemId<Integer> {
 	@Column(name = "senha")
 	private String senha;
 
+	public Usuario(final Integer id) {
+		super(id);
+	}
+
 	public Optional<Pessoa> getPessoa() {
 		return Optional.ofNullable(this.pessoa);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Id = %d", this.getId());
 	}
 
 }

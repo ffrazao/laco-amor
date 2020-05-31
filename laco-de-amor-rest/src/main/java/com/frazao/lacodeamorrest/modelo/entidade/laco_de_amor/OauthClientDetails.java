@@ -18,7 +18,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-
 public class OauthClientDetails implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -57,5 +56,10 @@ public class OauthClientDetails implements Serializable {
 
 	@Column(name = "web_server_redirect_uri")
 	private String webServerRedirectUri;
+
+	@Override
+	public String toString() {
+		return String.format("ClientId = %d", this.getClientId());
+	}
 
 }

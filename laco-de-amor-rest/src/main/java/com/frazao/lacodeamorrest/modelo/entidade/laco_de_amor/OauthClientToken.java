@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-
 public class OauthClientToken implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -41,5 +40,10 @@ public class OauthClientToken implements Serializable {
 
 	@Column(name = "user_name")
 	private String userName;
+
+	@Override
+	public String toString() {
+		return String.format("Token = %d", this.getToken());
+	}
 
 }

@@ -17,8 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(schema = "laco_de_amor", name = "evento_tipo")
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-
+@EqualsAndHashCode(callSuper = false, of = "id")
 public class EventoTipo extends EntidadeBaseTemId<Integer> {
 
 	private static final long serialVersionUID = 1L;
@@ -33,5 +32,14 @@ public class EventoTipo extends EntidadeBaseTemId<Integer> {
 
 	@Column(name = "nome")
 	private String nome;
+
+	public EventoTipo(final Integer id) {
+		super(id);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Id = %d", this.getId());
+	}
 
 }
