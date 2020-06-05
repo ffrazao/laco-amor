@@ -1,14 +1,15 @@
 LACO DE AMOR
 
-fazer o cadastro de usuarios
-	fazer o form do usuario
+fazer a tela de vitrine
+fazer a tela de pedido de compras
+proteger as rotas de acordo com o perfil do usuario (admin acessa tudo, parceiro acessa utilizar e produzr, cliente acessa somente a página de perfil e pedido de compras)
 fazer a atualizaçao do token oauth (usar a opcao refresh token do oauth)
-implementar a opção para filtrar por array de ids com opção de ids que devem ser inclusos e excluídos => (com utilização do caractere ! antes do valor do parâmetro).
-
 padronizar respostas do servico com ResponseEntity
 
 
 
+ok => implementar a opção para filtrar por array de ids com opção de ids que devem ser inclusos e excluídos => (com utilização do caractere ! antes do valor do parâmetro).
+ok => fazer o cadastro de usuarios, fazer o form do usuario
 ok => colocar meu nome no rodape
 ok => colocar este email para contato
 ok => colocar copyright 2020
