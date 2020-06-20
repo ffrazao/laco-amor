@@ -1,12 +1,5 @@
 Tutorial de Instalação de Componentes
 
-Instalar o Material Design for Bootstrap
-
-https://mdbootstrap.com/
-
-Este projeto junta os componentes do Angular Material Design com o Bootstrap. Fazer o download da versão free e iniciar a construção do projeto. Versão baixada em 11/04/2020.
-
-
 
 
 Dica importante para criação de subrepositorios e vinculação com o repositório principal
@@ -34,7 +27,8 @@ No Angular 9 é possível instalar o bootstrap de forma direta com o comando
 ng add @ng-bootstrap/schematics
 
 
-
+DATETIME PICKER - MUITO BOM, MAS NÃO USEI AINDA
+https://github.com/h2qutc/angular-material-components
 
 HEROKU
 Definir variáveis de ambiente para definir o profile do spring
